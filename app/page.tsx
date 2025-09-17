@@ -1,0 +1,372 @@
+"use client"
+
+import { useEffect, useState, useRef, SetStateAction } from "react"
+import { motion, AnimatePresence, useAnimationControls } from "framer-motion"
+import LoadingAnimation from "@/components/loading-animation"
+import Navbar from "@/components/navbar"
+import Footer from "@/components/footer"
+ 
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+
+// Home slider cards for nav destinations
+const sections = [
+  {
+    id: 'albums',
+    title: 'Albums',
+    description: 'Our memories captured together.',
+    href: '/albums',
+    imageUrl: '/images/sakura.jpg',
+    accentColor: 'rgba(255, 182, 193, 0.35)'
+  },
+  {
+    id: 'journals',
+    title: 'Journals',
+    description: 'Thoughts, letters, and little stories.',
+    href: '/journals',
+    imageUrl: '/images/tulip.png',
+    accentColor: 'rgba(255, 160, 180, 0.35)'
+  },
+  {
+    id: 'special-days',
+    title: 'Special Days',
+    description: 'Anniversaries, birthdays, and milestones.',
+    href: '/special-days',
+    imageUrl: '/images/lavender.jpg',
+    accentColor: 'rgba(255, 145, 175, 0.35)'
+  }
+]
+
+export default function Home() {
+  const [loading, setLoading] = useState(true)
+  const [activeSection, setActiveSection] = useState(0)
+  const [expandedCard, setExpandedCard] = useState<string | null>(null)
+  const [wheelTimeout, setWheelTimeout] = useState<NodeJS.Timeout | null>(null)
+  const [isCardChanging, setIsCardChanging] = useState(false)
+  
+  
+  // Animation controls for smooth transitions
+  const sphereControls = useAnimationControls()
+  const expandedCardRef = useRef(null)
+  
+  // Set up smooth loading transition
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false)
+    }, 3000)
+    
+    return () => clearTimeout(timer)
+  }, [])
+
+  // No carousel; static list
+  
+  // Removed wheel hijacking to allow natural page scroll
+  
+  // Handle key events for accessibility
+  useEffect(() => {
+    const handleKeyDown = (e: { key: string }) => {
+      if (expandedCard) {
+        // Handle expanded card view navigation
+        if (e.key === 'Escape') {
+          handleCardClose()
+        } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+          // Find current section index
+          const currentIndex = sections.findIndex(s => s.id === expandedCard)
+          if (currentIndex < sections.length - 1) {
+            setExpandedCard(sections[currentIndex + 1].id)
+          }
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+          // Find current section index
+          const currentIndex = sections.findIndex(s => s.id === expandedCard)
+          if (currentIndex > 0) {
+            setExpandedCard(sections[currentIndex - 1].id)
+          }
+        }
+      } else {
+        // Handle main view navigation
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+          if (activeSection < sections.length - 1) {
+            setActiveSection(prev => prev + 1)
+          }
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+          if (activeSection > 0) {
+            setActiveSection(prev => prev - 1)
+          }
+        } else if (e.key === 'Enter') {
+          handleCardExpand(sections[activeSection].id)
+        }
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [activeSection, expandedCard])
+  
+  const handleCardExpand = (sectionId: SetStateAction<string | null>) => {
+    setExpandedCard(sectionId)
+  }
+  
+  const handleCardClose = () => {
+    setExpandedCard(null)
+  }
+
+  if (loading) {
+    return <LoadingAnimation />
+  }
+
+  return (
+    <main className="min-h-screen flex flex-col bg-white relative">
+      {/* Background subtle gradient */}
+      <div className="fixed inset-0 bg-gradient-to-br from-white via-gray-50 to-gray-100 -z-10" />
+      
+      {/* Navbar component */}
+      <Navbar currentPage="home" />
+
+      {/* Main content - lift hero up and leave space for footer */}
+      <div className="flex-1 flex flex-col items-center justify-start pb-36">
+        <div className="flex flex-col items-center w-full px-4 sm:px-6 lg:px-8 pt-4">
+          {/* Hero image (full-bleed) */}
+          <div className="relative w-screen left-1/2 -translate-x-1/2 my-0">
+            <img src="/images/hero.jpg" alt="hero" className="w-full h-56 sm:h-72 md:h-80 lg:h-[32rem] object-cover" />
+          </div>
+          {/* Quote below image with staggered scroll-in animation (runs once) */}
+          <motion.div 
+            className="w-full flex justify-end px-4 sm:px-8 md:px-12 lg:px-16"
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.25 }}
+            variants={{
+              hidden: { opacity: 0, y: 18, filter: 'blur(8px)' },
+              show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.7, ease: [0.23,1,0.32,1] } }
+            }}
+          >
+            <motion.div 
+              className="font-handwriting text-right text-black text-4xl sm:text-6xl md:text-7xl lg:text-8xl leading-tight max-w-[1200px]"
+              variants={{
+                hidden: { opacity: 0, y: 10 },
+                show: { opacity: 1, y: 0, transition: { staggerChildren: 0.14 } }
+              }}
+            >
+              <motion.span className="block" variants={{ hidden: { opacity: 0, y: 12, filter: 'blur(6px)' }, show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.6 } } }}>
+                In our little corner,
+              </motion.span>
+              <motion.span className="block" variants={{ hidden: { opacity: 0, y: 12, filter: 'blur(6px)' }, show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.6 } } }}>
+                love grows like <span className="text-pink-500 underline">sakura</span>
+              </motion.span>
+              <motion.span className="block" variants={{ hidden: { opacity: 0, y: 12, filter: 'blur(6px)' }, show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.6 } } }}>
+                in spring.
+              </motion.span>
+            </motion.div>
+          </motion.div>
+          {/* Three-page list on the left with separators */}
+          <div className="w-full max-w-5xl mt-6">
+            {sections.map((item, idx) => (
+              <div key={item.id}>
+                <div className="flex items-start gap-4 sm:gap-6">
+                  <img 
+                    src={item.imageUrl}
+                    alt={item.title}
+                    className="w-24 h-24 sm:w-32 sm:h-32 object-contain select-none"
+                  />
+                  <div className="flex-1">
+                    <Link href={item.href}>
+                      <h3 className="font-handwriting text-2xl sm:text-3xl md:text-4xl text-gray-800 hover:blur-[0.5px] transition duration-300 cursor-pointer">
+                        {item.title}
+                      </h3>
+                    </Link>
+                    <p className="text-sm sm:text-base text-gray-600 mt-1 max-w-prose">
+                      {item.description}
+                    </p>
+                  </div>
+                </div>
+                {idx < sections.length - 1 && (
+                  <div className="relative my-6">
+                    <div className="h-px bg-gray-200/90 w-[95vw] left-1/2 -translate-x-1/2 relative" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Tracking dots removed */}
+
+      {/* Enhanced expanded card view - fully responsive */}
+      <AnimatePresence>
+        {expandedCard && (
+          <motion.div 
+            className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 p-2 sm:p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <motion.div
+              ref={expandedCardRef}
+              className="relative w-full h-full sm:w-[80vw] sm:h-[85vh] lg:w-[80vw] lg:h-[85vh] bg-cover bg-center rounded-2xl sm:rounded-3xl overflow-hidden"
+              style={{ 
+                backgroundImage: `url(${sections.find(s => s.id === expandedCard)?.imageUrl || '/images/default.jpg'})` 
+              }}
+              initial={{ opacity: 0, scale: 0.92, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 10 }}
+              transition={{ 
+                type: "spring", 
+                damping: 30,
+                stiffness: 300,
+                mass: 0.8
+              }}
+            >
+              {/* Subtle gradient overlay for better text readability */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
+              
+              {/* Close button - responsive positioning */}
+              <motion.div 
+                className="absolute top-3 right-3 sm:top-4 sm:right-4 z-50"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3, duration: 0.3 }}
+              >
+                <motion.button 
+                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center border border-white/20"
+                  whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.4)" }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleCardClose}
+                >
+                  <span className="text-white text-lg sm:text-xl">×</span>
+                </motion.button>
+              </motion.div>
+              
+              {/* Animated card - responsive content */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 w-full px-4 sm:px-8 lg:w-3/4 max-w-xl">
+                <motion.div 
+                  className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 sm:p-6 lg:p-8 overflow-hidden"
+                  style={{
+                    boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+                  }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                >
+                  {/* Subtle accent color line at top of card */}
+                  <div 
+                    className="absolute top-0 left-0 right-0 h-1 rounded-t"
+                    style={{ 
+                      background: sections.find(s => s.id === expandedCard)?.accentColor || 'rgba(147, 112, 219, 0.7)'
+                    }}
+                  />
+                  
+                  <div className="text-xs text-white/80 uppercase mb-1 tracking-wider">Portal</div>
+                  
+                  {/* Responsive title typography */}
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-light text-white mb-3 sm:mb-4 tracking-tight">
+                    {sections.find(s => s.id === expandedCard)?.title}
+                  </h2>
+                  
+                  <div className="text-xs sm:text-sm text-white/90 mb-4 sm:mb-6 tracking-wide"></div>
+                  
+                  <p className="text-white/85 text-xs sm:text-sm leading-relaxed mb-6 sm:mb-8 font-light">
+                    {sections.find(s => s.id === expandedCard)?.description}
+                  </p>
+                  
+                  <div className="flex items-center mt-2">
+                    <Link href={sections.find(s => s.id === expandedCard)?.href || '#'}>
+                      <Button variant="outline" size="sm" className="text-xs">Open</Button>
+                    </Link>
+                  </div>
+                </motion.div>
+              </div>
+              
+              {/* Position indicator - responsive */}
+              <div className="absolute bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                {sections.map((section, index) => (
+                  <motion.div 
+                    key={index}
+                    className={`rounded-full cursor-pointer ${
+                      section.id === expandedCard 
+                        ? "bg-white w-4 sm:w-6 h-1.5" 
+                        : "bg-white/40 w-1.5 h-1.5"
+                    }`}
+                    animate={{
+                      width: section.id === expandedCard ? (typeof window !== 'undefined' && window.innerWidth < 640 ? 16 : 24) : 6,
+                    }}
+                    whileHover={{ 
+                      backgroundColor: section.id === expandedCard 
+                        ? "rgba(255, 255, 255, 1)" 
+                        : "rgba(255, 255, 255, 0.6)" 
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setExpandedCard(section.id)
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                  />
+                ))}
+              </div>
+              
+              {/* Navigation buttons - responsive and safe positioning */}
+              <div className="absolute bottom-12 sm:bottom-20 left-0 right-0 flex justify-between px-4 sm:px-8 lg:px-12 text-white/50 text-sm">
+                {expandedCard !== sections[0].id && (
+                  <motion.div 
+                    className="flex items-center cursor-pointer group px-2 sm:px-4 py-2 rounded-full"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5, duration: 0.3 }}
+                    whileHover={{ 
+                      backgroundColor: "rgba(255, 255, 255, 0.15)",
+                      transition: { duration: 0.2 }
+                    }}
+                    onClick={() => {
+                      const currentIndex = sections.findIndex(s => s.id === expandedCard)
+                      if (currentIndex > 0) {
+                        setExpandedCard(sections[currentIndex - 1].id)
+                      }
+                    }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 sm:mr-2 transform group-hover:-translate-x-1 transition-transform duration-300">
+                      <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    <span className="text-xs sm:text-sm font-light group-hover:text-white transition-colors duration-300">Previous</span>
+                  </motion.div>
+                )}
+                
+                {expandedCard !== sections[sections.length-1].id && (
+                  <motion.div 
+                    className="flex items-center ml-auto cursor-pointer group px-2 sm:px-4 py-2 rounded-full"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5, duration: 0.3 }}
+                    whileHover={{ 
+                      backgroundColor: "rgba(255, 255, 255, 0.15)",
+                      transition: { duration: 0.2 }
+                    }}
+                    onClick={() => {
+                      const currentIndex = sections.findIndex(s => s.id === expandedCard)
+                      if (currentIndex < sections.length - 1) {
+                        setExpandedCard(sections[currentIndex + 1].id)
+                      }
+                    }}
+                  >
+                    <span className="text-xs sm:text-sm font-light group-hover:text-white transition-colors duration-300">Next</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 sm:ml-2 transform group-hover:translate-x-1 transition-transform duration-300">
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Footer stays at bottom */}
+      <div className="relative z-10">
+        <Footer />
+      </div>
+    </main>
+  )
+}
