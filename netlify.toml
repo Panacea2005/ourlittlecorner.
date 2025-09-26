@@ -2,7 +2,4 @@
   command = "pnpm build"
   publish = ".next"
 
-[[plugins]]
-  package = "@netlify/next"
-
 
