@@ -70,10 +70,53 @@ export default function AuthPage() {
 
   return (
     <main className="relative w-full h-screen overflow-hidden flex">
-      {/* Full screen background with gradient sphere */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white via-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="w-full h-full flex items-center justify-center">
-          <GradientSakura />
+      {/* Full screen background with multiple concentric sakura gradients on white */}
+      <div className="absolute inset-0 bg-white overflow-hidden">
+        {/* Rings container centered (2D layout) */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          {/* Ring 1 (inner) - smallest, few items */}
+          {[0, 90, 180, 270].map((deg) => (
+            <div
+              key={`r1-${deg}`}
+              className="absolute opacity-35"
+              style={{ transform: `rotate(${deg}deg) translate(15vh) rotate(-${deg}deg) scale(0.2)` }}
+            >
+              <GradientSakura />
+            </div>
+          ))}
+
+          {/* Ring 2 */}
+          {[0, 72, 144, 216, 288].map((deg) => (
+            <div
+              key={`r2-${deg}`}
+              className="absolute opacity-40"
+              style={{ transform: `rotate(${deg}deg) translate(40vh) rotate(-${deg}deg) scale(0.2)` }}
+            >
+              <GradientSakura />
+            </div>
+          ))}
+
+          {/* Ring 3 */}
+          {[0, 60, 120, 180, 240, 300].map((deg) => (
+            <div
+              key={`r3-${deg}`}
+              className="absolute opacity-45"
+              style={{ transform: `rotate(${deg}deg) translate(65vh) rotate(-${deg}deg) scale(0.2)` }}
+            >
+              <GradientSakura />
+            </div>
+          ))}
+
+          {/* Ring 4 (outer) - largest */}
+          {[0, 51.43, 102.86, 154.29, 205.72, 257.15, 308.58].map((deg) => (
+            <div
+              key={`r4-${deg}`}
+              className="absolute opacity-50"
+              style={{ transform: `rotate(${deg}deg) translate(90vh) rotate(-${deg}deg) scale(0.2)` }}
+            >
+              <GradientSakura />
+            </div>
+          ))}
         </div>
       </div>
 

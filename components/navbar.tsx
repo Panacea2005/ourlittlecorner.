@@ -183,12 +183,25 @@ export default function Navbar({ currentPage = "home" }: { currentPage?: string 
     }
   }, [])
 
-  // Lock body scroll when menu is open
+  // Lock body scroll when menu is open and handle keyboard shortcuts
   useEffect(() => {
     if (menuOpen) {
       const original = document.body.style.overflow
       document.body.style.overflow = 'hidden'
-      return () => { document.body.style.overflow = original }
+      
+      // Handle escape key to close menu
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          setMenuOpen(false)
+        }
+      }
+      
+      document.addEventListener('keydown', handleEscape)
+      
+      return () => { 
+        document.body.style.overflow = original
+        document.removeEventListener('keydown', handleEscape)
+      }
     }
   }, [menuOpen])
 
@@ -203,7 +216,11 @@ export default function Navbar({ currentPage = "home" }: { currentPage?: string 
     >
       {/* Left: Sakura menu button */}
       <div className="flex items-center gap-2">
-        <button onClick={() => setMenuOpen(true)} aria-label="Open menu" className="p-1 rounded-full hover:bg-gray-100">
+        <button 
+          onClick={() => setMenuOpen(true)} 
+          aria-label="Open menu" 
+          className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 border border-transparent hover:border-gray-200"
+        >
           <img src="/images/flower-pattern.png" alt="menu" className="w-6 h-6" />
         </button>
       </div>
@@ -237,10 +254,20 @@ export default function Navbar({ currentPage = "home" }: { currentPage?: string 
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            className="fixed inset-0 z-[60] bg-white/70 backdrop-blur-xl flex items-center justify-center"
+            className="fixed inset-0 z-[9999] bg-white/70 backdrop-blur-xl flex items-center justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            style={{ 
+              position: 'fixed', 
+              top: 0, 
+              left: 0, 
+              right: 0, 
+              bottom: 0,
+              width: '100vw',
+              height: '100vh',
+              zIndex: 9999
+            }}
             // Do not close on backdrop click; only via X
           >
             {/* Close (X) icon */}
@@ -263,14 +290,29 @@ export default function Navbar({ currentPage = "home" }: { currentPage?: string 
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <Link href="/albums" onClick={() => setMenuOpen(false)} className="block font-handwriting text-6xl sm:text-7xl md:text-8xl text-gray-800 hover:blur-[0.5px] transition">
-                Albums
+              <Link href="/albums" onClick={() => setMenuOpen(false)} className="group block font-handwriting text-6xl sm:text-7xl md:text-8xl text-gray-800 transition">
+                <span className="relative inline-block">
+                  Albums
+                  <span className="pointer-events-none absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[3px] bg-gray-700 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></span>
+                </span>
               </Link>
-              <Link href="/journals" onClick={() => setMenuOpen(false)} className="block font-handwriting text-6xl sm:text-7xl md:text-8xl text-gray-800 hover:blur-[0.5px] transition">
-                Journals
+              <Link href="/journals" onClick={() => setMenuOpen(false)} className="group block font-handwriting text-6xl sm:text-7xl md:text-8xl text-gray-800 transition">
+                <span className="relative inline-block">
+                  Journals
+                  <span className="pointer-events-none absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[3px] bg-gray-700 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></span>
+                </span>
               </Link>
-              <Link href="/special-days" onClick={() => setMenuOpen(false)} className="block font-handwriting text-6xl sm:text-7xl md:text-8xl text-gray-800 hover:blur-[0.5px] transition">
-                Special Days
+              <Link href="/special-days" onClick={() => setMenuOpen(false)} className="group block font-handwriting text-6xl sm:text-7xl md:text-8xl text-gray-800 transition">
+                <span className="relative inline-block">
+                  Special Days
+                  <span className="pointer-events-none absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[3px] bg-gray-700 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></span>
+                </span>
+              </Link>
+              <Link href="/memory-timeline" onClick={() => setMenuOpen(false)} className="group block font-handwriting text-6xl sm:text-7xl md:text-8xl text-gray-800 transition">
+                <span className="relative inline-block">
+                  Timeline
+                  <span className="pointer-events-none absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[3px] bg-gray-700 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></span>
+                </span>
               </Link>
             </motion.div>
           </motion.div>

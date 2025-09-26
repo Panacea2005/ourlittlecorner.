@@ -169,6 +169,7 @@ create table if not exists public.gallery_items (
 
 alter table public.gallery_items enable row level security;
 
+-- Everyone can see all gallery items (public read)
 drop policy if exists "Public read gallery_items" on public.gallery_items;
 create policy "Public read gallery_items" on public.gallery_items for select using (true);
 
@@ -194,9 +195,9 @@ create table if not exists public.special_days (
 
 alter table public.special_days enable row level security;
 
--- Each user can see only their own special days
+-- Everyone can see all special days (public read)
 drop policy if exists "Select own special_days" on public.special_days;
-create policy "Select own special_days" on public.special_days for select to authenticated using (user_id = auth.uid());
+create policy "Public read special_days" on public.special_days for select using (true);
 
 -- Insert rows only for yourself; if user_id omitted, default to auth.uid() via trigger
 drop policy if exists "Insert own special_days" on public.special_days;
@@ -265,6 +266,7 @@ create table if not exists public.journals (
 
 alter table public.journals enable row level security;
 
+-- Everyone can see all journals (public read)
 drop policy if exists "Public read journals" on public.journals;
 create policy "Public read journals" on public.journals for select using (true);
 

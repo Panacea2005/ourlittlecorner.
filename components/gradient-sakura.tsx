@@ -16,7 +16,7 @@ interface GradientSakuraProps {
 
 export default function GradientSakura({ colors }: GradientSakuraProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const animRef = useRef({ rotation: 0, speed: 0.005, animate: true })
+  const animRef = useRef({ rotation: 0, speed: 0.0015, animate: true })
 
   const defaultColors: ColorTheme = {
     center: "rgba(255, 210, 230, 1)",
@@ -54,17 +54,13 @@ export default function GradientSakura({ colors }: GradientSakuraProps) {
       const centerY = canvas.height / 2
       const distX = (x - centerX) / centerX
       const distY = (y - centerY) / centerY
-      animRef.current.speed = 0.005 + Math.abs(distX * distY) * 0.003
+      // slower response to mouse movement to keep speed low
+      animRef.current.speed = 0.0015 + Math.min(0.0008, Math.abs(distX * distY) * 0.0008)
     }
 
     window.addEventListener("mousemove", handleMouseMove)
 
-    const breathingInterval = setInterval(() => {
-      animRef.current.speed = 0.005 + Math.random() * 0.01
-      setTimeout(() => {
-        animRef.current.speed = 0.005
-      }, 800)
-    }, 5000)
+    // removed periodic speed bursts to reduce CPU/GPU load
 
     const drawPetal = (
       ctx: CanvasRenderingContext2D,
@@ -176,7 +172,7 @@ export default function GradientSakura({ colors }: GradientSakuraProps) {
     return () => {
       window.removeEventListener("resize", setCanvasDimensions)
       window.removeEventListener("mousemove", handleMouseMove)
-      clearInterval(breathingInterval)
+      // no interval to clear
     }
   }, [currentColors])
 

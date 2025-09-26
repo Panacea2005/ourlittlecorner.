@@ -6,7 +6,14 @@ import { useAuth } from "@/app/contexts/AuthContext"
 import { ProfileService, Profile } from "@/lib/services/profileService"
 import { triggerProfileRefresh } from "@/lib/services/profileEvents"
 import Navbar from "@/components/navbar"
- 
+import Footer from "@/components/footer"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Upload, User, Save } from "lucide-react"
 import { supabase } from "@/lib/supabase/supabaseClient"
 
 export default function ProfilePage() {
@@ -192,10 +199,13 @@ export default function ProfilePage() {
 
   if (loading || isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <div className="w-10 h-10 border-2 border-gray-300 border-t-gray-800 rounded-full animate-spin mb-4"></div>
-          <p className="text-gray-600 text-sm">Loading profile...</p>
+      <div className="min-h-screen flex flex-col">
+        <Navbar currentPage="profile" />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center">
+            <div className="w-10 h-10 border-2 border-gray-300 border-t-gray-800 rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-600 text-sm">Loading profile...</p>
+          </div>
         </div>
       </div>
     )
@@ -203,231 +213,246 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        <p className="text-gray-600">Please sign in to view your profile.</p>
+      <div className="min-h-screen flex flex-col">
+        <Navbar currentPage="profile" />
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-600">Please sign in to view your profile.</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Background footer image with subtle blur */}
-      <div className="fixed inset-0 -z-10">
-        <img src="/images/profile.jpg" alt="background" className="w-full h-full object-cover blur-sm opacity-80" />
-      </div>
-      
+    <div className="min-h-screen flex flex-col bg-white">
       {/* Navbar */}
       <Navbar currentPage="profile" />
       
+      {/* Background image (footer) */}
+      <div className="fixed inset-0 -z-10">
+        <img src="/images/footer.jpg" alt="background" className="w-full h-full object-cover" />
+      </div>
+      
       {/* Main content */}
-      <main className="flex-1 flex items-center justify-center px-4">
-        <div className="relative w-full max-w-3xl">
-          {/* Decorative background removed */}
-          
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Page Title */}
           <motion.div 
-            className="relative z-10 bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-sm border border-gray-100 max-h-[calc(100vh-160px)] overflow-auto"
+            className="mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="flex items-center mb-8">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="Profile avatar"
-                  className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border border-gray-200 mr-6 flex-shrink-0"
-                  onError={(e) => {
-                    // If avatar fails to load, hide it and show the fallback
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const fallback = target.nextElementSibling as HTMLElement;
-                    if (fallback) fallback.style.display = 'flex';
-                  }}
-                />
-              ) : null}
-              <div 
-                className={`w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-pink-100 to-pink-200 rounded-full flex items-center justify-center text-gray-800 text-xl mr-6 flex-shrink-0 ${avatarUrl ? 'hidden' : ''}`}
-              >
-                {name.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || '?'}
-              </div>
-              <div>
-                <h1 className="text-xl md:text-2xl font-light text-gray-800">Your Profile</h1>
-                <p className="text-xs md:text-sm text-gray-500">{user.email}</p>
-                {profile && (
-                  <p className="text-xs text-gray-400 mt-1">
-                    Last updated: {new Date(profile.updated_at).toLocaleDateString()}
-                  </p>
-                )}
-                {tableNotExists && (
-                  <p className="text-xs text-orange-500 mt-1">
-                    ⚠️ Using fallback data - database not configured
-                  </p>
-                )}
-              </div>
-            </div>
-            
+            <h1 className="font-handwriting text-4xl sm:text-5xl md:text-6xl text-gray-800 mb-2">
+              Profile
+            </h1>
+            <p className="text-gray-600 text-sm">
+              Manage your personal information and preferences
+            </p>
+          </motion.div>
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
             {/* Success message */}
             {successMessage && (
               <motion.div 
-                className="mb-6 p-4 bg-green-50 border border-green-100 rounded-md text-sm text-green-600"
+                className="mb-6"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                {successMessage}
+                <Alert className="border-green-200 bg-green-50">
+                  <AlertDescription className="text-green-700">
+                    {successMessage}
+                  </AlertDescription>
+                </Alert>
               </motion.div>
             )}
             
             {/* Error message */}
             {errorMessage && (
               <motion.div 
-                className="mb-6 p-4 bg-red-50 border border-red-100 rounded-md text-sm text-red-600"
+                className="mb-6"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                {errorMessage}
-                {tableNotExists && (
-                  <div className="mt-2 text-xs">
-                    <p><strong>To fix this:</strong></p>
-                    <ol className="list-decimal list-inside mt-1 space-y-1">
-                      <li>Go to your Supabase Dashboard → SQL Editor</li>
-                      <li>Run the SQL from <code>supabase_profiles_setup.sql</code></li>
-                      <li>Then run <code>migration_create_missing_profiles.sql</code></li>
-                      <li>Refresh this page</li>
-                    </ol>
-                  </div>
-                )}
+                <Alert className="border-red-200 bg-red-50">
+                  <AlertDescription className="text-red-700">
+                    {errorMessage}
+                    {tableNotExists && (
+                      <div className="mt-2 text-xs">
+                        <p><strong>To fix this:</strong></p>
+                        <ol className="list-decimal list-inside mt-1 space-y-1">
+                          <li>Go to your Supabase Dashboard → SQL Editor</li>
+                          <li>Run the SQL from <code>supabase_profiles_setup.sql</code></li>
+                          <li>Then run <code>migration_create_missing_profiles.sql</code></li>
+                          <li>Refresh this page</li>
+                        </ol>
+                      </div>
+                    )}
+                  </AlertDescription>
+                </Alert>
               </motion.div>
             )}
-            
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-1">
-                <label className="block text-xs text-gray-600 font-light">Display Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-transparent border-b border-gray-300 px-0 py-3 text-gray-800 text-sm focus:outline-none focus:border-b-gray-500 transition-colors"
-                  placeholder="Your name"
-                  maxLength={100}
-                />
-              </div>
-              
-              <div className="space-y-1">
-                <label className="block text-xs text-gray-600 font-light">Bio</label>
-                <textarea
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  className="w-full bg-transparent border-b border-gray-300 px-0 py-3 text-gray-800 text-sm focus:outline-none focus:border-b-gray-500 transition-colors resize-none"
-                  placeholder="Tell us a bit about yourself"
-                  rows={3}
-                  maxLength={500}
-                />
-                <p className="text-xs text-gray-400 mt-1">
-                  {bio.length}/500 characters
-                </p>
-              </div>
-              
-              <div className="space-y-1">
-                <div className="mt-1 flex items-center gap-3">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0]
-                      if (!file || !user) return
-                      setIsUploading(true)
-                      setErrorMessage("")
-                      try {
-                        const path = `${user.id}/avatar-${Date.now()}`
-                        const { error: upErr } = await supabase
-                          .storage
-                          .from('avatars')
-                          .upload(path, file, { upsert: true, cacheControl: '3600', contentType: file.type })
-                        if (upErr) throw upErr
-                        const { data } = supabase.storage.from('avatars').getPublicUrl(path)
-                        const publicUrl = data.publicUrl
-                        setAvatarUrl(publicUrl)
-                        // Persist immediately
-                        const { error: updErr } = await ProfileService.updateProfile(user.id, { avatar_url: publicUrl })
-                        if (updErr) {
-                          // fallback: keep in state, show message
-                          setErrorMessage(`Saved locally, but failed to persist: ${updErr.message}`)
-                        } else {
-                          setSuccessMessage('Avatar updated!')
-                          triggerProfileRefresh()
-                          setTimeout(() => setSuccessMessage(""), 2000)
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Profile Info Card */}
+              <Card className="lg:col-span-1">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="w-5 h-5" />
+                    Profile Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Avatar Section */}
+                  <div className="flex flex-col items-center space-y-4">
+                    <Avatar className="w-24 h-24">
+                      <AvatarImage src={avatarUrl} alt="Profile avatar" />
+                      <AvatarFallback className="text-2xl bg-gradient-to-r from-pink-100 to-pink-200 text-gray-800">
+                        {name.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (!file || !user) return
+                        setIsUploading(true)
+                        setErrorMessage("")
+                        try {
+                          const path = `${user.id}/avatar-${Date.now()}`
+                          const { error: upErr } = await supabase
+                            .storage
+                            .from('avatars')
+                            .upload(path, file, { upsert: true, cacheControl: '3600', contentType: file.type })
+                          if (upErr) throw upErr
+                          const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+                          const publicUrl = data.publicUrl
+                          setAvatarUrl(publicUrl)
+                          // Persist immediately
+                          const { error: updErr } = await ProfileService.updateProfile(user.id, { avatar_url: publicUrl })
+                          if (updErr) {
+                            // fallback: keep in state, show message
+                            setErrorMessage(`Saved locally, but failed to persist: ${updErr.message}`)
+                          } else {
+                            setSuccessMessage('Avatar updated!')
+                            triggerProfileRefresh()
+                            setTimeout(() => setSuccessMessage(""), 2000)
+                          }
+                        } catch (err: any) {
+                          setErrorMessage(err.message || 'Failed to upload avatar')
+                        } finally {
+                          setIsUploading(false)
+                          if (fileInputRef.current) fileInputRef.current.value = ''
                         }
-                      } catch (err: any) {
-                        setErrorMessage(err.message || 'Failed to upload avatar')
-                      } finally {
-                        setIsUploading(false)
-                        if (fileInputRef.current) fileInputRef.current.value = ''
-                      }
-                    }}
-                  />
-                  <motion.button
-                    type="button"
-                    className="rounded-full px-4 py-1.5 text-xs font-light text-pink-700 border border-pink-200 bg-white/70 hover:bg-white/90 backdrop-blur-sm transition-colors"
-                    onClick={() => fileInputRef.current?.click()}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    disabled={isUploading}
-                  >
-                    {isUploading ? 'Uploading…' : 'Upload Avatar'}
-                  </motion.button>
-                </div>
-                {avatarUrl && (
-                  <div className="mt-3">
-                    <p className="text-xs text-gray-600 font-light mb-2">Avatar Preview:</p>
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={avatarUrl}
-                        alt="Avatar preview"
-                        className="w-12 h-12 rounded-full object-cover border border-gray-200"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          target.nextElementSibling!.classList.remove('hidden');
-                        }}
-                        onLoad={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'block';
-                          target.nextElementSibling!.classList.add('hidden');
-                        }}
-                      />
-                      <div className="hidden text-xs text-red-500 bg-red-50 px-2 py-1 rounded">
-                        ⚠️ Unable to load image from this URL
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        This will be your new avatar
-                      </div>
-                    </div>
+                      }}
+                    />
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploading}
+                      className="w-full"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      {isUploading ? 'Uploading...' : 'Upload Avatar'}
+                    </Button>
                   </div>
-                )}
-              </div>
-              
-              <div className="flex justify-end pt-4">
-                <motion.button
-                  type="submit"
-                  className="rounded-full px-6 py-2 text-xs font-light text-white bg-black hover:bg-gray-800 transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-                  whileHover={{ scale: isSaving ? 1 : 1.03 }}
-                  whileTap={{ scale: isSaving ? 1 : 0.97 }}
-                  disabled={isSaving || tableNotExists}
-                >
-                  {isSaving ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  ) : null}
-                  {isSaving ? 'Saving...' : tableNotExists ? 'Setup Required' : 'Save Changes'}
-                </motion.button>
-              </div>
-            </form>
+
+                  {/* User Info */}
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="text-gray-500">Email:</span>
+                      <p className="font-medium">{user.email}</p>
+                    </div>
+                    {profile && (
+                      <div>
+                        <span className="text-gray-500">Last updated:</span>
+                        <p className="font-medium">{new Date(profile.updated_at).toLocaleDateString()}</p>
+                      </div>
+                    )}
+                    {tableNotExists && (
+                      <div className="text-orange-600 text-xs">
+                        ⚠️ Using fallback data - database not configured
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Edit Form Card */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Edit Profile</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="space-y-2">
+                      <label htmlFor="name" className="text-sm font-medium text-gray-700">
+                        Display Name
+                      </label>
+                      <Input
+                        id="name"
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Your name"
+                        maxLength={100}
+                        className="font-handwriting text-2xl sm:text-3xl md:text-4xl"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label htmlFor="bio" className="text-sm font-medium text-gray-700">
+                        Bio
+                      </label>
+                      <Textarea
+                        id="bio"
+                        value={bio}
+                        onChange={(e) => setBio(e.target.value)}
+                        placeholder="Tell us a bit about yourself"
+                        rows={4}
+                        maxLength={500}
+                        className="font-handwriting text-2xl sm:text-3xl md:text-4xl leading-relaxed resize-none"
+                      />
+                      <p className="text-xs text-gray-500">
+                        {bio.length}/500 characters
+                      </p>
+                    </div>
+                    
+                    <div className="flex justify-end pt-4">
+                      <Button
+                        type="submit"
+                        disabled={isSaving || tableNotExists}
+                        className="min-w-[120px]"
+                      >
+                        <Save className="w-4 h-4 mr-2" />
+                        {isSaving ? 'Saving...' : tableNotExists ? 'Setup Required' : 'Save Changes'}
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
           </motion.div>
         </div>
       </main>
+      
+      {/* Footer Section - scroll to view */}
+      <section className="h-screen flex items-end justify-center relative">
+        <div className="w-full">
+          <Footer />
+        </div>
+      </section>
     </div>
   )
 }

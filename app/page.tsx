@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef, SetStateAction } from "react"
-import { motion, AnimatePresence, useAnimationControls } from "framer-motion"
+import { motion, AnimatePresence, useAnimationControls, useScroll, useTransform } from "framer-motion"
 import LoadingAnimation from "@/components/loading-animation"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
@@ -34,6 +34,14 @@ const sections = [
     href: '/special-days',
     imageUrl: '/images/lavender.jpg',
     accentColor: 'rgba(255, 145, 175, 0.35)'
+  },
+  {
+    id: 'memory-timeline',
+    title: 'Timeline',
+    description: 'All our memories in chronological order.',
+    href: '/memory-timeline',
+    imageUrl: '/images/bouquet.jpg',
+    accentColor: 'rgba(255, 130, 170, 0.35)'
   }
 ]
 
@@ -43,11 +51,38 @@ export default function Home() {
   const [expandedCard, setExpandedCard] = useState<string | null>(null)
   const [wheelTimeout, setWheelTimeout] = useState<NodeJS.Timeout | null>(null)
   const [isCardChanging, setIsCardChanging] = useState(false)
+  const [currentSection, setCurrentSection] = useState(0)
+  const [dailySong, setDailySong] = useState<any>(null)
+  const [isLoadingSong, setIsLoadingSong] = useState(true)
+  const [loveQuote, setLoveQuote] = useState<string>('')
+  const [isLoadingQuote, setIsLoadingQuote] = useState(false)
   
+  const containerRef = useRef<HTMLDivElement>(null)
+  const heroRef = useRef<HTMLDivElement>(null)
+  const quoteRef = useRef<HTMLDivElement>(null)
+  const pagesRef = useRef<HTMLDivElement>(null)
+  const spotifyRef = useRef<HTMLDivElement>(null)
+  const footerRef = useRef<HTMLDivElement>(null)
   
   // Animation controls for smooth transitions
   const sphereControls = useAnimationControls()
   const expandedCardRef = useRef(null)
+  
+  // Scroll progress for parallax effects - initialize after mount
+  const [isMounted, setIsMounted] = useState(false)
+  
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+  
+  const { scrollYProgress } = useScroll(
+    isMounted && containerRef.current 
+      ? { container: containerRef }
+      : {}
+  )
+  const heroY = useTransform(scrollYProgress, [0, 0.25], [0, -50])
+  const quoteY = useTransform(scrollYProgress, [0.25, 0.5], [50, -50])
+  const pagesY = useTransform(scrollYProgress, [0.5, 0.75], [50, -50])
   
   // Set up smooth loading transition
   useEffect(() => {
@@ -58,9 +93,121 @@ export default function Home() {
     return () => clearTimeout(timer)
   }, [])
 
-  // No carousel; static list
-  
-  // Removed wheel hijacking to allow natural page scroll
+  // Fetch daily love song
+  useEffect(() => {
+    const fetchDailySong = async () => {
+      try {
+        setIsLoadingSong(true)
+        const response = await fetch('/api/spotify/daily-love-song')
+        if (response.ok) {
+          const data = await response.json()
+          setDailySong(data.song)
+        }
+      } catch (error) {
+        console.error('Failed to fetch daily song:', error)
+      } finally {
+        setIsLoadingSong(false)
+      }
+    }
+
+    fetchDailySong()
+  }, [])
+
+  // Fetch love quote when song changes
+  useEffect(() => {
+    if (dailySong) {
+      fetchLoveQuote()
+    }
+  }, [dailySong])
+
+  // Fetch love quotes
+  const fetchLoveQuote = async () => {
+    try {
+      setIsLoadingQuote(true)
+      
+      // Curated collection of beautiful love quotes
+      const loveQuotes = [
+        "Love is not about how much you say 'I love you', but how much you prove that it's true.",
+        "The best thing to hold onto in life is each other.",
+        "In all the world, there is no heart for me like yours.",
+        "Love is composed of a single soul inhabiting two bodies.",
+        "The greatest thing you'll ever learn is just to love and be loved in return.",
+        "I have found the one whom my soul loves.",
+        "You are my today and all of my tomorrows.",
+        "I love you not only for what you are, but for what I am when I am with you.",
+        "The best love is the kind that awakens the soul and makes us reach for more.",
+        "Love recognizes no barriers. It jumps hurdles, leaps fences, penetrates walls to arrive at its destination full of hope.",
+        "Being deeply loved by someone gives you strength, while loving someone deeply gives you courage.",
+        "The best and most beautiful things in the world cannot be seen or even touched - they must be felt with the heart.",
+        "Love is when the other person's happiness is more important than your own.",
+        "A successful marriage requires falling in love many times, always with the same person.",
+        "The real lover is the man who can thrill you by kissing your forehead or smiling into your eyes or just staring into space.",
+        "Love is friendship that has caught fire.",
+        "The best love is the kind that awakens the soul and makes us reach for more, that plants a fire in our hearts.",
+        "I love you more than yesterday, less than tomorrow.",
+        "Love is not finding someone to live with. It's finding someone you can't live without.",
+        "The greatest happiness of life is the conviction that we are loved; loved for ourselves, or rather, loved in spite of ourselves.",
+        "In your smile I see something more beautiful than the stars.",
+        "Every love story is beautiful, but ours is my favorite.",
+        "Love is the master key that opens the gates of happiness.",
+        "The best thing to hold onto in life is each other.",
+        "Love is like the wind, you can't see it but you can feel it.",
+        "A life without love is like a year without summer.",
+        "Love is the only force capable of transforming an enemy into a friend.",
+        "The heart has its reasons which reason knows nothing of.",
+        "Love is the flower you've got to let grow.",
+        "True love stories never have endings."
+      ]
+      
+      // Simulate a brief loading delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 600))
+      
+      // Randomly select a quote
+      const randomIndex = Math.floor(Math.random() * loveQuotes.length)
+      setLoveQuote(loveQuotes[randomIndex])
+      
+    } catch (error) {
+      console.error('Failed to fetch love quote:', error)
+      setLoveQuote("Love is the greatest adventure of all.")
+    } finally {
+      setIsLoadingQuote(false)
+    }
+  }
+
+
+  // Smooth scroll to section
+  const scrollToSection = (sectionIndex: number) => {
+    const container = containerRef.current
+    if (!container) return
+
+    const targetScrollTop = sectionIndex * window.innerHeight
+    
+    container.scrollTo({
+      top: targetScrollTop,
+      behavior: 'smooth'
+    })
+    
+    setCurrentSection(sectionIndex)
+  }
+
+  // Handle scroll events to update current section (for progress tracking only)
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const handleScroll = () => {
+      const scrollTop = container.scrollTop
+      const sectionHeight = window.innerHeight
+      const newSection = Math.round(scrollTop / sectionHeight)
+      
+      if (newSection !== currentSection) {
+        setCurrentSection(newSection)
+      }
+    }
+
+    container.addEventListener('scroll', handleScroll)
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [currentSection])
   
   // Handle key events for accessibility
   useEffect(() => {
@@ -85,14 +232,17 @@ export default function Home() {
       } else {
         // Handle main view navigation
         if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-          if (activeSection < sections.length - 1) {
-            setActiveSection(prev => prev + 1)
+          const newSection = Math.min(4, currentSection + 1)
+          if (newSection !== currentSection) {
+            scrollToSection(newSection)
           }
         } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-          if (activeSection > 0) {
-            setActiveSection(prev => prev - 1)
+          const newSection = Math.max(0, currentSection - 1)
+          if (newSection !== currentSection) {
+            scrollToSection(newSection)
           }
-        } else if (e.key === 'Enter') {
+        } else if (e.key === 'Enter' && currentSection === 2) {
+          // Only allow enter on pages section
           handleCardExpand(sections[activeSection].id)
         }
       }
@@ -103,7 +253,7 @@ export default function Home() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [activeSection, expandedCard])
+  }, [activeSection, expandedCard, currentSection])
   
   const handleCardExpand = (sectionId: SetStateAction<string | null>) => {
     setExpandedCard(sectionId)
@@ -122,84 +272,527 @@ export default function Home() {
       {/* Background subtle gradient */}
       <div className="fixed inset-0 bg-gradient-to-br from-white via-gray-50 to-gray-100 -z-10" />
       
-      {/* Navbar component */}
-      <Navbar currentPage="home" />
+      {/* Navbar component - fixed */}
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <Navbar currentPage="home" />
+      </div>
 
-      {/* Main content - lift hero up and leave space for footer */}
-      <div className="flex-1 flex flex-col items-center justify-start pb-36">
-        <div className="flex flex-col items-center w-full px-4 sm:px-6 lg:px-8 pt-4">
-          {/* Hero image (full-bleed) */}
-          <div className="relative w-screen left-1/2 -translate-x-1/2 my-0">
-            <img src="/images/hero.jpg" alt="hero" className="w-full h-56 sm:h-72 md:h-80 lg:h-[32rem] object-cover" />
-          </div>
-          {/* Quote below image with staggered scroll-in animation (runs once) */}
+      {/* Scroll container */}
+      <div 
+        ref={containerRef}
+        className="h-screen overflow-y-auto"
+        style={{ scrollBehavior: 'smooth' }}
+      >
+        {/* Section 1: Hero Image */}
+        <motion.section 
+          ref={heroRef}
+          className="h-screen flex items-center justify-center relative"
+        >
           <motion.div 
-            className="w-full flex justify-end px-4 sm:px-8 md:px-12 lg:px-16"
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.25 }}
-            variants={{
-              hidden: { opacity: 0, y: 18, filter: 'blur(8px)' },
-              show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.7, ease: [0.23,1,0.32,1] } }
-            }}
+            className="relative w-full h-full"
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
           >
+            <img 
+              src="/images/hero.jpg" 
+              alt="hero" 
+              className="w-full h-full object-cover" 
+            />
+          </motion.div>
+          
+          {/* Floating particles animation */}
+          <motion.div className="absolute inset-0 pointer-events-none">
+            {[...Array(6)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-2 h-2 bg-white/20 rounded-full"
+                style={{
+                  left: `${20 + (i * 15)}%`,
+                  top: `${30 + (i % 3) * 20}%`
+                }}
+                animate={{
+                  y: [-10, -30, -10],
+                  opacity: [0.3, 0.8, 0.3],
+                  scale: [0.8, 1.2, 0.8]
+                }}
+                transition={{
+                  duration: 4 + (i * 0.5),
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: i * 0.5
+                }}
+              />
+            ))}
+          </motion.div>
+          
+          {/* Elegant scroll indicator */}
+          <motion.div 
+            className="absolute bottom-12 left-1/2 transform -translate-x-1/2 text-white/80"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2.5, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <motion.div
+              animate={{ y: [0, 10, 0] }}
+              transition={{ 
+                duration: 3, 
+                repeat: Infinity, 
+                ease: [0.4, 0, 0.6, 1]
+              }}
+              className="flex flex-col items-center"
+            >
+              <motion.span 
+                className="text-sm mb-3 tracking-wide font-light"
+                animate={{ opacity: [0.6, 1, 0.6] }}
+                transition={{ 
+                  duration: 2, 
+                  repeat: Infinity, 
+                  ease: "easeInOut" 
+                }}
+              >
+                Explore our story
+              </motion.span>
+              <motion.div
+                className="w-px h-12 bg-gradient-to-b from-white/60 to-transparent relative"
+                initial={{ height: 0 }}
+                animate={{ height: 48 }}
+                transition={{ delay: 3, duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <motion.div
+                  className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full"
+                  animate={{ y: [-12, 0, -12] }}
+                  transition={{ 
+                    duration: 2, 
+                    repeat: Infinity, 
+                    ease: [0.4, 0, 0.6, 1],
+                    delay: 4
+                  }}
+                />
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </motion.section>
+
+        {/* Section 2: Quote */}
+        <motion.section 
+          ref={quoteRef}
+          className="h-screen flex items-center justify-center relative px-4 sm:px-6 lg:px-8"
+        >
+          <motion.div 
+            className="w-full flex justify-center relative"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false, amount: 0.2, margin: "-100px" }}
+            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* Elegant background elements */}
+            <motion.div
+              className="absolute -top-20 -right-20 w-40 h-40 bg-pink-100/30 rounded-full blur-3xl"
+              initial={{ scale: 0, rotate: 0 }}
+              whileInView={{ scale: 1, rotate: 180 }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{ duration: 3, ease: [0.16, 1, 0.3, 1] }}
+            />
+            <motion.div
+              className="absolute -bottom-32 -left-32 w-60 h-60 bg-pink-200/20 rounded-full blur-3xl"
+              initial={{ scale: 0, rotate: 0 }}
+              whileInView={{ scale: 1, rotate: -90 }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{ duration: 4, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
+            />
+            
             <motion.div 
-              className="font-handwriting text-right text-black text-4xl sm:text-6xl md:text-7xl lg:text-8xl leading-tight max-w-[1200px]"
-              variants={{
-                hidden: { opacity: 0, y: 10 },
-                show: { opacity: 1, y: 0, transition: { staggerChildren: 0.14 } }
+              className="font-handwriting text-center text-black text-4xl sm:text-6xl md:text-7xl lg:text-8xl leading-tight max-w-[1200px] relative z-10"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: false, amount: 0.3, margin: "-50px" }}
+              transition={{ 
+                duration: 1.5, 
+                ease: [0.16, 1, 0.3, 1],
+                staggerChildren: 0.3
               }}
             >
-              <motion.span className="block" variants={{ hidden: { opacity: 0, y: 12, filter: 'blur(6px)' }, show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.6 } } }}>
+              <motion.span 
+                className="block"
+                initial={{ opacity: 0, y: 50, filter: 'blur(20px)' }}
+                whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                viewport={{ once: false, amount: 0.5 }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              >
                 In our little corner,
               </motion.span>
-              <motion.span className="block" variants={{ hidden: { opacity: 0, y: 12, filter: 'blur(6px)' }, show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.6 } } }}>
-                love grows like <span className="text-pink-500 underline">sakura</span>
+              <motion.span 
+                className="block relative"
+                initial={{ opacity: 0, y: 50, filter: 'blur(20px)' }}
+                whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                viewport={{ once: false, amount: 0.5 }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+              >
+                love grows like{" "}
+                <motion.span 
+                  className="text-pink-500 underline relative inline-block"
+                  initial={{ scale: 1 }}
+                  whileInView={{ scale: [1, 1.05, 1] }}
+                  viewport={{ once: false, amount: 0.8 }}
+                  transition={{ duration: 2, ease: [0.16, 1, 0.3, 1], delay: 1.5 }}
+                >
+                  sakura
+                  <motion.div
+                    className="absolute -top-8 -right-8 w-6 h-6"
+                    initial={{ opacity: 0, scale: 0, rotate: 0 }}
+                    whileInView={{ opacity: [0, 1, 0], scale: [0, 1, 1.2], rotate: 360 }}
+                    viewport={{ once: false, amount: 0.8 }}
+                    transition={{ duration: 2, ease: [0.16, 1, 0.3, 1], delay: 2 }}
+                  >
+                    🌸
+                  </motion.div>
+                </motion.span>
               </motion.span>
-              <motion.span className="block" variants={{ hidden: { opacity: 0, y: 12, filter: 'blur(6px)' }, show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.6 } } }}>
+              <motion.span 
+                className="block"
+                initial={{ opacity: 0, y: 50, filter: 'blur(20px)' }}
+                whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                viewport={{ once: false, amount: 0.5 }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
+              >
                 in spring.
               </motion.span>
             </motion.div>
           </motion.div>
-          {/* Three-page list on the left with separators */}
-          <div className="w-full max-w-5xl mt-6">
+        </motion.section>
+
+        {/* Section 3: Pages Section */}
+        <motion.section 
+          ref={pagesRef}
+          className="h-screen flex items-center justify-center relative px-4 sm:px-6 lg:px-8"
+        >
+          <motion.div 
+            className="w-full max-w-5xl relative"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false, amount: 0.2, margin: "-100px" }}
+            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* Background decorations removed for minimal look */}
+
             {sections.map((item, idx) => (
-              <div key={item.id}>
-                <div className="flex items-start gap-4 sm:gap-6">
-                  <img 
+              <motion.div 
+                key={item.id}
+                initial={{ opacity: 0, x: -80, filter: 'blur(10px)' }}
+                whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                viewport={{ once: false, amount: 0.3, margin: "-50px" }}
+                transition={{ 
+                  duration: 1.2, 
+                  delay: idx * 0.2, 
+                  ease: [0.16, 1, 0.3, 1] 
+                }}
+              >
+                <motion.div 
+                  className="flex items-start gap-4 sm:gap-6 group cursor-pointer relative overflow-hidden rounded-2xl p-6 -m-6"
+                  onClick={() => handleCardExpand(item.id)}
+                  whileHover={{ borderRadius: "1.5rem" }}
+                  initial={{ borderRadius: "1rem" }}
+                >
+                  {/* Removed pink sweep overlay */}
+                  
+                  <motion.img 
                     src={item.imageUrl}
                     alt={item.title}
-                    className="w-24 h-24 sm:w-32 sm:h-32 object-contain select-none"
+                    className="w-24 h-24 sm:w-32 sm:h-32 object-contain select-none relative z-10"
+                    whileHover={{ 
+                      scale: 1.1,
+                      rotate: [0, -2, 2, 0],
+                      transition: { 
+                        scale: { duration: 0.3 },
+                        rotate: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+                      },
+                      filter: 'saturate(1.1)'
+                    }}
+                    initial={{ filter: 'saturate(0.8)' }}
                   />
-                  <div className="flex-1">
-                    <Link href={item.href}>
-                      <h3 className="font-handwriting text-2xl sm:text-3xl md:text-4xl text-gray-800 hover:blur-[0.5px] transition duration-300 cursor-pointer">
+                  <div className="flex-1 relative z-10">
+                    <motion.h3 
+                      className="font-handwriting text-2xl sm:text-3xl md:text-4xl text-gray-800 transition duration-300 relative"
+                      whileHover={{ x: 10 }}
+                    >
+                      <span className="relative inline-block">
                         {item.title}
-                      </h3>
-                    </Link>
-                    <p className="text-sm sm:text-base text-gray-600 mt-1 max-w-prose">
+                        <span className="pointer-events-none absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[3px] bg-gray-700 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></span>
+                      </span>
+                    </motion.h3>
+                    <motion.p 
+                      className="text-sm sm:text-base text-gray-600 mt-1 max-w-prose"
+                      initial={{ opacity: 0.7 }}
+                      whileHover={{ opacity: 1 }}
+                    >
                       {item.description}
-                    </p>
+                    </motion.p>
                   </div>
-                </div>
+                </motion.div>
                 {idx < sections.length - 1 && (
-                  <div className="relative my-6">
-                    <div className="h-px bg-gray-200/90 w-[95vw] left-1/2 -translate-x-1/2 relative" />
-                  </div>
+                  <motion.div 
+                    className="relative my-8"
+                    initial={{ opacity: 0, scaleX: 0 }}
+                    whileInView={{ opacity: 1, scaleX: 1 }}
+                    viewport={{ once: false, amount: 0.8 }}
+                    transition={{ 
+                      duration: 1, 
+                      delay: (idx * 0.2) + 0.6, 
+                      ease: [0.16, 1, 0.3, 1] 
+                    }}
+                  >
+                    <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent w-full origin-center" />
+                  </motion.div>
                 )}
-              </div>
+              </motion.div>
             ))}
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        </motion.section>
 
-      {/* Tracking dots removed */}
+       {/* Section 4: Daily Love Song - Minimal & Clean */}
+       <motion.section 
+          ref={spotifyRef}
+          className="h-screen flex items-center justify-center relative px-4 sm:px-6 lg:px-8"
+        >
+          {/* Clean white background with subtle elements */}
+          <motion.div 
+            className="absolute inset-0 bg-white"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false, amount: 0.2 }}
+            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* Minimal floating elements - matching other sections */}
+            <motion.div
+              className="absolute top-20 right-20 w-32 h-32 bg-pink-100/30 rounded-full blur-3xl"
+              animate={{
+                scale: [1, 1.2, 1],
+                rotate: [0, 180, 360]
+              }}
+              transition={{
+                duration: 20,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            />
+            <motion.div
+              className="absolute bottom-32 left-32 w-24 h-24 bg-pink-200/20 rounded-full blur-2xl"
+              animate={{
+                scale: [1.1, 0.9, 1.1],
+                rotate: [360, 180, 0]
+              }}
+              transition={{
+                duration: 15,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            />
+          </motion.div>
+
+          <motion.div 
+            className="w-full max-w-4xl relative"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false, amount: 0.2, margin: "-100px" }}
+            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* Simple section title - matching other sections */}
+            <motion.div 
+              className="text-center mb-12"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.5 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <h2 className="font-handwriting text-3xl sm:text-4xl md:text-5xl text-gray-800 mb-4">
+                Today's Love Song
+              </h2>
+            </motion.div>
+
+            {/* Clean, minimal song card */}
+            <motion.div 
+              className="relative"
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{ duration: 1, delay: 0.4 }}
+            >
+              {isLoadingSong ? (
+                <div className="flex items-center justify-center py-16">
+                  <motion.div
+                    className="w-6 h-6 border-2 border-gray-300 border-t-gray-600 rounded-full"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  />
+                  <span className="ml-3 text-gray-600">Loading today's song...</span>
+                </div>
+               ) : dailySong ? (
+                 <div className="flex flex-col lg:flex-row gap-12 items-start">
+                   {/* Left side - Song information */}
+                   <motion.div 
+                     className="flex-1 space-y-6"
+                     initial={{ opacity: 0, x: -30 }}
+                     whileInView={{ opacity: 1, x: 0 }}
+                     viewport={{ once: false, amount: 0.3 }}
+                     transition={{ duration: 0.8, delay: 0.4 }}
+                   >
+                     {/* Album artwork */}
+                     <motion.div 
+                       className="flex justify-center lg:justify-start"
+                       whileHover={{ scale: 1.02 }}
+                       transition={{ duration: 0.3 }}
+                     >
+                       <img 
+                         src={dailySong.image} 
+                         alt={dailySong.album_name}
+                         className="w-48 h-48 rounded-2xl object-cover shadow-lg"
+                       />
+                     </motion.div>
+                     
+                     {/* Song information */}
+                     <div className="text-center lg:text-left space-y-4">
+                       {/* Song title */}
+                       <motion.div
+                         initial={{ opacity: 0, y: 20 }}
+                         whileInView={{ opacity: 1, y: 0 }}
+                         viewport={{ once: false, amount: 0.5 }}
+                         transition={{ duration: 0.8, delay: 0.6 }}
+                       >
+                         <h3 className="font-handwriting text-3xl lg:text-4xl text-gray-800 mb-3">
+                           {dailySong.name}
+                         </h3>
+                         <motion.div
+                           className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent w-full max-w-md mx-auto lg:mx-0"
+                           initial={{ scaleX: 0 }}
+                           whileInView={{ scaleX: 1 }}
+                           viewport={{ once: false, amount: 0.8 }}
+                           transition={{ duration: 1, delay: 1 }}
+                         />
+                       </motion.div>
+                       
+                       {/* Artist name */}
+                       <motion.p 
+                         className="text-gray-600 text-xl"
+                         initial={{ opacity: 0, y: 20 }}
+                         whileInView={{ opacity: 1, y: 0 }}
+                         viewport={{ once: false, amount: 0.5 }}
+                         transition={{ duration: 0.8, delay: 0.8 }}
+                       >
+                         by {dailySong.artists}
+                       </motion.p>
+
+                       {/* Album name */}
+                       <motion.p 
+                         className="text-gray-500 text-lg italic"
+                         initial={{ opacity: 0, y: 20 }}
+                         whileInView={{ opacity: 1, y: 0 }}
+                         viewport={{ once: false, amount: 0.5 }}
+                         transition={{ duration: 0.8, delay: 1 }}
+                       >
+                         from "{dailySong.album_name}"
+                       </motion.p>
+
+                       {/* Play button */}
+                       <motion.div
+                         className="pt-6 flex justify-center"
+                         initial={{ opacity: 0, y: 20 }}
+                         whileInView={{ opacity: 1, y: 0 }}
+                         viewport={{ once: false, amount: 0.5 }}
+                         transition={{ duration: 0.8, delay: 1.2 }}
+                       >
+                         <motion.a
+                           href={dailySong.external_url}
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           className="inline-flex items-center gap-2 px-6 py-3 border border-gray-900 text-gray-900 rounded-full hover:bg-gray-50 transition-colors duration-200 text-sm font-medium"
+                           whileHover={{ scale: 1.05 }}
+                           whileTap={{ scale: 0.98 }}
+                         >
+                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                             <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.42 1.56-.299.421-1.02.599-1.559.3z"/>
+                           </svg>
+                           Play on Spotify
+                         </motion.a>
+                       </motion.div>
+                     </div>
+                   </motion.div>
+
+                   {/* Right side - Lyrics */}
+                   <motion.div 
+                     className="flex-1 space-y-4"
+                     initial={{ opacity: 0, x: 30 }}
+                     whileInView={{ opacity: 1, x: 0 }}
+                     viewport={{ once: false, amount: 0.3 }}
+                     transition={{ duration: 0.8, delay: 0.6 }}
+                   >
+                     
+                     <motion.div 
+                       className="h-full flex items-center justify-center"
+                       initial={{ opacity: 0, y: 20 }}
+                       whileInView={{ opacity: 1, y: 0 }}
+                       viewport={{ once: false, amount: 0.5 }}
+                       transition={{ duration: 0.8, delay: 1 }}
+                     >
+                       {isLoadingQuote ? (
+                         <div className="flex items-center justify-center py-4">
+                           <motion.div
+                             className="w-6 h-6 border-2 border-gray-300 border-t-pink-500 rounded-full"
+                             animate={{ rotate: 360 }}
+                             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                           />
+                           <span className="ml-3 text-gray-600 font-handwriting">Loading love quote...</span>
+                         </div>
+                       ) : (
+                         <div className="flex flex-col items-center justify-center text-center pt-16 pl-8">
+                           <motion.div
+                             className="max-w-2xl mx-auto"
+                             initial={{ opacity: 0, y: 20 }}
+                             animate={{ opacity: 1, y: 0 }}
+                             transition={{ duration: 0.8 }}
+                           >
+                             <p className="text-gray-700 font-handwriting text-4xl leading-relaxed mb-6">
+                               "{loveQuote}"
+                             </p>
+                           </motion.div>
+                         </div>
+                       )}
+                     </motion.div>
+                   </motion.div>
+                 </div>
+              ) : (
+                <div className="text-center py-16">
+                  <div className="text-4xl mb-4 text-gray-400">♪</div>
+                  <p className="text-gray-600">Unable to load today's song</p>
+                  <p className="text-gray-500 text-sm mt-2">Please try again later</p>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        </motion.section>
+
+        {/* Section 5: Footer */}
+        <motion.section 
+          ref={footerRef}
+          className="h-screen flex items-end justify-center relative"
+        >
+          <motion.div 
+            className="w-full"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.3, margin: "-100px" }}
+            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <Footer />
+          </motion.div>
+        </motion.section>
+      </div>
 
       {/* Enhanced expanded card view - fully responsive */}
       <AnimatePresence>
         {expandedCard && (
           <motion.div 
-            className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 p-2 sm:p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-2 sm:p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -362,11 +955,6 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Footer stays at bottom */}
-      <div className="relative z-10">
-        <Footer />
-      </div>
     </main>
   )
 }
