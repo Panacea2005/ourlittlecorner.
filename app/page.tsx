@@ -268,7 +268,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col bg-white relative">
+    <main className="min-h-dvh flex flex-col bg-white relative">
       {/* Background subtle gradient */}
       <div className="fixed inset-0 bg-gradient-to-br from-white via-gray-50 to-gray-100 -z-10" />
       
@@ -280,13 +280,13 @@ export default function Home() {
       {/* Scroll container */}
       <div 
         ref={containerRef}
-        className="h-screen overflow-y-auto"
+        className="h-dvh overflow-y-auto"
         style={{ scrollBehavior: 'smooth' }}
       >
         {/* Section 1: Hero Image */}
         <motion.section 
           ref={heroRef}
-          className="h-screen flex items-center justify-center relative"
+          className="min-h-dvh flex items-center justify-center relative"
         >
           <motion.div 
             className="relative w-full h-full"
@@ -377,7 +377,7 @@ export default function Home() {
         {/* Section 2: Quote */}
         <motion.section 
           ref={quoteRef}
-          className="h-screen flex items-center justify-center relative px-4 sm:px-6 lg:px-8"
+          className="min-h-dvh flex items-center justify-center relative px-4 sm:px-6 lg:px-8"
         >
           <motion.div 
             className="w-full flex justify-center relative"
@@ -465,7 +465,7 @@ export default function Home() {
         {/* Section 3: Pages Section */}
         <motion.section 
           ref={pagesRef}
-          className="h-screen flex items-center justify-center relative px-4 sm:px-6 lg:px-8"
+          className="min-h-dvh flex items-center justify-center relative px-4 sm:px-6 lg:px-8"
         >
           <motion.div 
             className="w-full max-w-5xl relative"
@@ -553,7 +553,7 @@ export default function Home() {
        {/* Section 4: Daily Love Song - Minimal & Clean */}
        <motion.section 
           ref={spotifyRef}
-          className="h-screen flex items-center justify-center relative px-4 sm:px-6 lg:px-8"
+          className="min-h-dvh flex items-center justify-center relative px-4 sm:px-6 lg:px-8"
         >
           {/* Clean white background with subtle elements */}
           <motion.div 
@@ -628,7 +628,7 @@ export default function Home() {
                   <span className="ml-3 text-gray-600">Loading today's song...</span>
                 </div>
                ) : dailySong ? (
-                 <div className="flex flex-col lg:flex-row gap-12 items-start">
+                 <div className="flex flex-col lg:flex-row gap-12 items-center lg:items-start">
                    {/* Left side - Song information */}
                    <motion.div 
                      className="flex-1 space-y-6"
@@ -728,7 +728,7 @@ export default function Home() {
                    >
                      
                      <motion.div 
-                       className="h-full flex items-center justify-center"
+                      className="h-full flex items-center justify-center"
                        initial={{ opacity: 0, y: 20 }}
                        whileInView={{ opacity: 1, y: 0 }}
                        viewport={{ once: false, amount: 0.5 }}
@@ -744,7 +744,7 @@ export default function Home() {
                            <span className="ml-3 text-gray-600 font-handwriting">Loading love quote...</span>
                          </div>
                        ) : (
-                         <div className="flex flex-col items-center justify-center text-center pt-16 pl-8">
+                         <div className="flex flex-col items-center justify-center text-center pt-8 sm:pt-12 lg:pt-16 px-4 sm:px-6 lg:pl-8 lg:px-0">
                            <motion.div
                              className="max-w-2xl mx-auto"
                              initial={{ opacity: 0, y: 20 }}
@@ -772,20 +772,14 @@ export default function Home() {
         </motion.section>
 
         {/* Section 5: Footer */}
-        <motion.section 
+        <section 
           ref={footerRef}
-          className="h-screen flex items-end justify-center relative"
+          className="w-full"
         >
-          <motion.div 
-            className="w-full"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.3, margin: "-100px" }}
-            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-          >
+          <div className="w-full">
             <Footer />
-          </motion.div>
-        </motion.section>
+          </div>
+        </section>
       </div>
 
       {/* Enhanced expanded card view - fully responsive */}

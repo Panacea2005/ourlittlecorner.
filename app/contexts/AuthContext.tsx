@@ -1,13 +1,11 @@
 "use client"
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { Session, User, createClient } from '@supabase/supabase-js'
+import { Session, User } from '@supabase/supabase-js'
 import { ProfileService } from '@/lib/services/profileService'
+import { supabase } from '@/lib/supabase/supabaseClient'
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Use shared Supabase client to avoid multiple GoTrueClient instances
 
 interface AuthContextProps {
   session: Session | null

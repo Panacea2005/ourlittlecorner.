@@ -8,6 +8,7 @@ import GradientSakura from "@/components/gradient-sakura";
 import { useAuth } from "@/app/contexts/AuthContext";
 
 export default function AuthPage() {
+  const SIGN_UP_ENABLED = false;
   // Form state
   const [isSignIn, setIsSignIn] = useState(true);
   const [email, setEmail] = useState("");
@@ -70,53 +71,12 @@ export default function AuthPage() {
 
   return (
     <main className="relative w-full h-screen overflow-hidden flex">
-      {/* Full screen background with multiple concentric sakura gradients on white */}
+      {/* Full screen background with a single centered sakura gradient */}
       <div className="absolute inset-0 bg-white overflow-hidden">
-        {/* Rings container centered (2D layout) */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          {/* Ring 1 (inner) - smallest, few items */}
-          {[0, 90, 180, 270].map((deg) => (
-            <div
-              key={`r1-${deg}`}
-              className="absolute opacity-35"
-              style={{ transform: `rotate(${deg}deg) translate(15vh) rotate(-${deg}deg) scale(0.2)` }}
-            >
-              <GradientSakura />
-            </div>
-          ))}
-
-          {/* Ring 2 */}
-          {[0, 72, 144, 216, 288].map((deg) => (
-            <div
-              key={`r2-${deg}`}
-              className="absolute opacity-40"
-              style={{ transform: `rotate(${deg}deg) translate(40vh) rotate(-${deg}deg) scale(0.2)` }}
-            >
-              <GradientSakura />
-            </div>
-          ))}
-
-          {/* Ring 3 */}
-          {[0, 60, 120, 180, 240, 300].map((deg) => (
-            <div
-              key={`r3-${deg}`}
-              className="absolute opacity-45"
-              style={{ transform: `rotate(${deg}deg) translate(65vh) rotate(-${deg}deg) scale(0.2)` }}
-            >
-              <GradientSakura />
-            </div>
-          ))}
-
-          {/* Ring 4 (outer) - largest */}
-          {[0, 51.43, 102.86, 154.29, 205.72, 257.15, 308.58].map((deg) => (
-            <div
-              key={`r4-${deg}`}
-              className="absolute opacity-50"
-              style={{ transform: `rotate(${deg}deg) translate(90vh) rotate(-${deg}deg) scale(0.2)` }}
-            >
-              <GradientSakura />
-            </div>
-          ))}
+          <div className="opacity-50 scale-90 sm:scale-95 md:scale-100 lg:scale-110">
+            <GradientSakura />
+          </div>
         </div>
       </div>
 
@@ -136,10 +96,10 @@ export default function AuthPage() {
       </Link>
 
       {/* Right side auth panel with light theme grainy effect */}
-      <div className="absolute right-0 top-0 bottom-0 w-[45%] min-w-[500px] z-20">
+      <div className="relative md:absolute md:right-0 md:top-0 md:bottom-0 w-full md:w-[45%] md:min-w-[500px] z-20">
         {/* Light panel with grainy texture */}
         <motion.div
-          className="h-full w-full bg-white/70 flex flex-col border-l border-white/40"
+          className="h-full w-full bg-white/70 flex flex-col md:border-l border-white/40"
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
@@ -154,18 +114,18 @@ export default function AuthPage() {
           />
 
           {/* Content container with adjusted layout */}
-          <div className="relative z-10 flex flex-col h-full px-16 pt-16 pb-8">
+          <div className="relative z-10 flex flex-col h-full px-6 sm:px-10 md:px-16 pt-10 sm:pt-14 md:pt-16 pb-8">
             {/* Welcome text at the top */}
             <motion.div
-              className="mb-16"
+              className="mt-10 sm:mt-12 md:mt-16 mb-16"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
               <h1 className="text-gray-800 text-4xl font-light mb-2 font-handwriting">
-                {isSignIn ? "Welcome back to our little corner" : "Join ourlittlecorner"}
+                {isSignIn || !SIGN_UP_ENABLED ? "Welcome back to our little corner" : "Join ourlittlecorner"}
               </h1>
-              {!isSignIn ? (
+              {!isSignIn && SIGN_UP_ENABLED ? (
                 <p className="text-sm text-gray-600 font-light">
                   A cozy space for memories, journals, and special days.
                 </p>
@@ -175,22 +135,22 @@ export default function AuthPage() {
                 </p>
               )}
 
-              <div className="flex items-center text-sm text-gray-600 font-light">
-                <span>
-                  {isSignIn
-                    ? "Don't have an account?"
-                    : "Already have an account?"}
-                </span>
-                <button
-                  className="ml-2 text-indigo-600 hover:text-indigo-800 transition-colors"
-                  onClick={() => {
-                    setIsSignIn(!isSignIn);
-                    setErrorMessage("");
-                  }}
-                >
-                  {isSignIn ? "Sign Up" : "Sign In"}
-                </button>
-              </div>
+              {SIGN_UP_ENABLED && (
+                <div className="flex items-center text-sm text-gray-600 font-light">
+                  <span>
+                    {isSignIn ? "Don't have an account?" : "Already have an account?"}
+                  </span>
+                  <button
+                    className="ml-2 text-indigo-600 hover:text-indigo-800 transition-colors"
+                    onClick={() => {
+                      setIsSignIn(!isSignIn);
+                      setErrorMessage("");
+                    }}
+                  >
+                    {isSignIn ? "Sign Up" : "Sign In"}
+                  </button>
+                </div>
+              )}
             </motion.div>
 
             {/* Flex spacer to push form to bottom */}
@@ -220,7 +180,7 @@ export default function AuthPage() {
 
               <AnimatePresence mode="wait">
                 <motion.form
-                  key={isSignIn ? "signin" : "signup"}
+                  key={isSignIn || !SIGN_UP_ENABLED ? "signin" : "signup"}
                   className="space-y-6"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -229,7 +189,7 @@ export default function AuthPage() {
                   onSubmit={handleSubmit}
                 >
                   {/* Name field for signup only */}
-                  {!isSignIn && (
+                  {!isSignIn && SIGN_UP_ENABLED && (
                     <motion.div
                       className="space-y-1"
                       initial={{ opacity: 0, height: 0 }}
@@ -321,7 +281,7 @@ export default function AuthPage() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                           >
-                            {isSignIn ? "Enter with Email" : "Create Account"}
+                          {(isSignIn || !SIGN_UP_ENABLED) ? "Enter with Email" : "Create Account"}
                           </motion.span>
                         )}
                       </AnimatePresence>
@@ -333,23 +293,25 @@ export default function AuthPage() {
 
             {/* Social login removed */}
 
-            {/* Terms of service text */}
-            <div className="text-xs text-gray-500 font-light leading-relaxed">
-              By signing up, you agree to our{" "}
-              <a
-                href="#"
-                className="text-pink-600 hover:text-pink-800 transition-colors"
-              >
-                Promise of Love
-              </a>{" "}
-              and{" "}
-              <a
-                href="#"
-                className="text-pink-600 hover:text-pink-800 transition-colors"
-              >
-                Eternal Devotion
-              </a>
-            </div>
+            {/* Terms of service text (show when sign up enabled) */}
+            {SIGN_UP_ENABLED && (
+              <div className="text-xs text-gray-500 font-light leading-relaxed">
+                By signing up, you agree to our{" "}
+                <a
+                  href="#"
+                  className="text-pink-600 hover:text-pink-800 transition-colors"
+                >
+                  Promise of Love
+                </a>{" "}
+                and{" "}
+                <a
+                  href="#"
+                  className="text-pink-600 hover:text-pink-800 transition-colors"
+                >
+                  Eternal Devotion
+                </a>
+              </div>
+            )}
           </div>
         </motion.div>
       </div>

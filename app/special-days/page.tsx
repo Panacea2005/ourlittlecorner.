@@ -9,7 +9,7 @@ import { useAuth } from "@/app/contexts/AuthContext"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
@@ -57,6 +57,8 @@ export default function SpecialDaysPage() {
   const [authorFilter, setAuthorFilter] = useState<string>("all")
   const [startDate, setStartDate] = useState<string>("")
   const [endDate, setEndDate] = useState<string>("")
+  // Track dates explicitly cleared this session to suppress yearly fallback badges
+  const [suppressedDates, setSuppressedDates] = useState<Set<string>>(new Set())
   const [showFilters, setShowFilters] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
@@ -300,6 +302,8 @@ export default function SpecialDaysPage() {
       const { error } = await supabase.from('special_days').delete().eq('id', existing.id)
       if (error) throw error
       setItems(prev => prev.filter(x => x.id !== existing.id))
+      // Mark this date as suppressed so we don't show a fallback yearly badge
+      setSuppressedDates(prev => new Set([...Array.from(prev), editDate]))
       setDialogOpen(false)
       setEditDate("")
       setTitle("")
@@ -331,26 +335,26 @@ export default function SpecialDaysPage() {
       <Navbar currentPage="special-days" />
 
       {/* Title Section */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="font-handwriting text-4xl sm:text-5xl md:text-6xl text-black">
+          <h1 className="font-handwriting text-3xl sm:text-5xl md:text-6xl text-black">
             Special Days
           </h1>
-          <p className="mt-2 text-gray-600 text-lg font-light">
+          <p className="mt-2 text-gray-600 text-base sm:text-lg font-light">
             Celebrate life's precious moments
           </p>
         </motion.div>
       </div>
 
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 sm:pb-12">
         {/* View Mode Toggle */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6 sm:mb-8 gap-3 flex-wrap">
           <motion.div 
-            className="text-2xl font-medium text-gray-900"
+            className="text-xl sm:text-2xl font-medium text-gray-900"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -358,7 +362,7 @@ export default function SpecialDaysPage() {
             {viewMode === 'calendar' ? monthLabel : 'Special Days'}
           </motion.div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 w-full md:w-auto flex-wrap">
             {/* View Mode Toggle */}
             <div className="flex items-center border rounded-lg">
               <Button
@@ -414,30 +418,30 @@ export default function SpecialDaysPage() {
         {/* List View Controls */}
         {viewMode === 'list' && (
           <div className="mb-8 space-y-4">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <div className="flex flex-col sm:flex-row gap-3 flex-1">
-                <div className="relative max-w-md">
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+              <div className="flex flex-col md:flex-row gap-3 flex-1 w-full">
+                <div className="relative w-full md:max-w-md">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
                     type="text"
                     placeholder="Search special days..."
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); setPage(1) }}
-                    className="pl-10 font-handwriting"
+                    className="pl-10 font-handwriting w-full"
                   />
                 </div>
                 
                 <Button
                   variant="outline"
                   onClick={() => setShowFilters(!showFilters)}
-                  className="gap-2"
+                  className="gap-2 w-full md:w-auto"
                 >
                   <Filter className="w-4 h-4" />
                   Filters
                 </Button>
               </div>
               
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 w-full md:w-auto flex-wrap">
                 {/* Sort Controls */}
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">Sort by:</span>
@@ -633,39 +637,56 @@ export default function SpecialDaysPage() {
                       
                       {(byDate.get(dateKey)?.[0]) && (
                         <div className="flex-1 space-y-1">
-                          <Badge 
-                            variant="secondary" 
-                            className={`text-xs ${
-                              byDate.get(dateKey)?.[0]?.kind === 'birthday' ? 'bg-pink-100 text-pink-800' :
-                              byDate.get(dateKey)?.[0]?.kind === 'anniversary' ? 'bg-red-100 text-red-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}
-                          >
-                            {byDate.get(dateKey)?.[0]?.kind || 'other'}
-                          </Badge>
-                          <div className="text-xs text-gray-900 font-medium truncate">
+                          <div className="inline-flex items-center gap-1.5">
+                            {/* Compact type chip on mobile; full badge on >=sm */}
+                            <div className={`inline-flex items-center justify-center w-5 h-5 rounded-full sm:hidden ${
+                              byDate.get(dateKey)?.[0]?.kind === 'birthday' ? 'bg-pink-200' :
+                              byDate.get(dateKey)?.[0]?.kind === 'anniversary' ? 'bg-red-200' :
+                              'bg-gray-200'
+                            }`}>
+                              {byDate.get(dateKey)?.[0]?.kind === 'birthday' && <Gift className="w-3 h-3 text-pink-700" />}
+                              {byDate.get(dateKey)?.[0]?.kind === 'anniversary' && <Heart className="w-3 h-3 text-red-700" />}
+                              {byDate.get(dateKey)?.[0]?.kind === 'other' && <Star className="w-3 h-3 text-yellow-600" />}
+                            </div>
+                            <Badge 
+                              variant="secondary" 
+                              className={`hidden sm:inline-flex text-[10px] ${
+                                byDate.get(dateKey)?.[0]?.kind === 'birthday' ? 'bg-pink-100 text-pink-800' :
+                                byDate.get(dateKey)?.[0]?.kind === 'anniversary' ? 'bg-red-100 text-red-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}
+                            >
+                              {byDate.get(dateKey)?.[0]?.kind || 'other'}
+                            </Badge>
+                          </div>
+                          <div className="text-[11px] sm:text-xs text-gray-900 font-medium truncate">
                             {byDate.get(dateKey)?.[0]?.title || 'Special Day'}
                           </div>
                           {byDate.get(dateKey)?.[0]?.note && (
-                            <div className="text-xs text-gray-600 line-clamp-2">
+                            <div className="hidden sm:block text-xs text-gray-600 line-clamp-2">
                               {byDate.get(dateKey)?.[0]?.note}
                             </div>
                           )}
                           {byDate.get(dateKey)?.[0]?.user_name && (
-                            <div className="text-xs text-gray-500">
+                            <div className="hidden sm:block text-xs text-gray-500">
                               by {byDate.get(dateKey)?.[0]?.user_name}
                             </div>
                           )}
                         </div>
                       )}
                       
-                      {(!byDate.get(dateKey)?.[0] && recurringItems.length > 0) && (
+                      {(!byDate.get(dateKey)?.[0] && recurringItems.length > 0 && !suppressedDates.has(dateKey)) && (
                         <div className="flex-1 space-y-1">
-                          <Badge variant="outline" className="text-xs bg-indigo-50 text-indigo-700 border-indigo-200">
-                            <Star className="w-3 h-3 mr-1" />
-                            yearly
-                          </Badge>
-                          <div className="text-xs text-gray-900 font-medium truncate">
+                          <div className="inline-flex items-center gap-1.5">
+                            <div className="inline-flex items-center justify-center w-5 h-5 rounded-full sm:hidden bg-indigo-200">
+                              <Star className="w-3 h-3 text-indigo-700" />
+                            </div>
+                            <Badge variant="outline" className="hidden sm:inline-flex text-[10px] bg-indigo-50 text-indigo-700 border-indigo-200">
+                              <Star className="w-3 h-3 mr-1" />
+                              yearly
+                            </Badge>
+                          </div>
+                          <div className="text-[11px] sm:text-xs text-gray-900 font-medium truncate">
                             {recurringItems[0]?.title || 'Special Day'}
                           </div>
                         </div>
@@ -683,12 +704,12 @@ export default function SpecialDaysPage() {
         {viewMode === 'list' && (
           <div className="space-y-4">
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <Card key={i} className="overflow-hidden">
-                    <div className="h-32 bg-gray-200 animate-pulse" />
-                    <CardContent className="p-4 space-y-2">
-                      <div className="h-4 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-28 sm:h-32 bg-gray-200 animate-pulse" />
+                    <CardContent className="p-3 sm:p-4 space-y-2">
+                      <div className="h-3 sm:h-4 bg-gray-200 rounded animate-pulse" />
                       <div className="h-3 bg-gray-200 rounded w-3/4 animate-pulse" />
                     </CardContent>
                   </Card>
@@ -709,7 +730,7 @@ export default function SpecialDaysPage() {
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
                 {paginatedItems.map((item) => (
                   <motion.div
                     key={item.id}
@@ -722,7 +743,7 @@ export default function SpecialDaysPage() {
                       onClick={() => openEditor(item.date)}
                     >
                       {/* Header with type indicator */}
-                      <div className="relative h-24 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+                      <div className="relative h-20 sm:h-24 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
                         <div className="absolute top-3 left-3 flex items-center gap-2">
                           {item.kind === 'birthday' && <Gift className="w-5 h-5 text-pink-500" />}
                           {item.kind === 'anniversary' && <Heart className="w-5 h-5 text-red-500" />}
@@ -737,15 +758,15 @@ export default function SpecialDaysPage() {
                       </div>
                       
                       {/* Content */}
-                      <CardContent className="p-4">
-                        <div className="font-handwriting text-lg text-gray-800 mb-2 line-clamp-1">
+                      <CardContent className="p-3 sm:p-4">
+                        <div className="font-handwriting text-base sm:text-lg text-gray-800 mb-2 line-clamp-1">
                           {item.title || 'Untitled'}
                         </div>
                         <div className="font-handwriting text-sm text-gray-600 line-clamp-2 leading-relaxed">
                           {item.note || 'No description...'}
                         </div>
                         <div className="mt-3 flex items-center justify-between">
-                          <div className="text-xs text-gray-400">
+                          <div className="text-[11px] sm:text-xs text-gray-400">
                             {item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}
                           </div>
                           {item.user_name && (
@@ -765,11 +786,11 @@ export default function SpecialDaysPage() {
             {filteredItems.length > 0 && (
               <div className="mt-8">
                 <Separator className="mb-6" />
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="text-xs sm:text-sm text-gray-600">
                     Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, filteredItems.length)} of {filteredItems.length} special days
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap justify-end">
                     <Button
                       variant="outline"
                       size="sm"
@@ -838,6 +859,7 @@ export default function SpecialDaysPage() {
                 {editDate ? `Edit ${editDate}` : 'Add Special Day'}
               </DialogTitle>
             </DialogHeader>
+            <DialogDescription className="sr-only">Create or edit a special day with a title, note, and type.</DialogDescription>
             
             <div className="space-y-6">
               <div className="space-y-2">

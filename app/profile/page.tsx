@@ -227,13 +227,10 @@ export default function ProfilePage() {
       {/* Navbar */}
       <Navbar currentPage="profile" />
       
-      {/* Background image (footer) */}
-      <div className="fixed inset-0 -z-10">
-        <img src="/images/footer.jpg" alt="background" className="w-full h-full object-cover" />
-      </div>
+      {/* Subtle background removed for mobile clarity */}
       
       {/* Main content */}
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="max-w-4xl mx-auto">
           {/* Page Title */}
           <motion.div 
@@ -242,7 +239,7 @@ export default function ProfilePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="font-handwriting text-4xl sm:text-5xl md:text-6xl text-gray-800 mb-2">
+            <h1 className="font-handwriting text-3xl sm:text-5xl md:text-6xl text-gray-800 mb-2">
               Profile
             </h1>
             <p className="text-gray-600 text-sm">
@@ -298,7 +295,7 @@ export default function ProfilePage() {
               </motion.div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
               {/* Profile Info Card */}
               <Card className="lg:col-span-1">
                 <CardHeader>
@@ -407,7 +404,7 @@ export default function ProfilePage() {
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Your name"
                         maxLength={100}
-                        className="font-handwriting text-2xl sm:text-3xl md:text-4xl"
+                        className="font-handwriting text-xl sm:text-3xl md:text-4xl"
                       />
                     </div>
                     
@@ -422,7 +419,7 @@ export default function ProfilePage() {
                         placeholder="Tell us a bit about yourself"
                         rows={4}
                         maxLength={500}
-                        className="font-handwriting text-2xl sm:text-3xl md:text-4xl leading-relaxed resize-none"
+                        className="font-handwriting text-lg sm:text-3xl md:text-4xl leading-relaxed resize-none"
                       />
                       <p className="text-xs text-gray-500">
                         {bio.length}/500 characters
@@ -447,12 +444,7 @@ export default function ProfilePage() {
         </div>
       </main>
       
-      {/* Footer Section - scroll to view */}
-      <section className="h-screen flex items-end justify-center relative">
-        <div className="w-full">
-          <Footer />
-        </div>
-      </section>
+      <Footer />
     </div>
   )
 }

@@ -184,24 +184,24 @@ export default function MemoryTimelinePage() {
       <Navbar currentPage="memory-timeline" />
 
       {/* Title Section */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="font-handwriting text-4xl sm:text-5xl md:text-6xl text-black">
+          <h1 className="font-handwriting text-3xl sm:text-5xl md:text-6xl text-black">
             Memory Timeline
           </h1>
-          <p className="mt-2 text-gray-600 text-lg font-light">
+          <p className="mt-2 text-gray-600 text-base sm:text-lg font-light">
             All our precious moments in chronological order
           </p>
         </motion.div>
       </div>
 
       {/* Stats Cards */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -252,7 +252,7 @@ export default function MemoryTimelinePage() {
         </div>
       </div>
 
-      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 sm:pb-12">
         {error && (
           <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
             {error}

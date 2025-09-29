@@ -10,7 +10,7 @@ import { useAuth } from "@/app/contexts/AuthContext"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Separator } from "@/components/ui/separator"
@@ -311,33 +311,33 @@ export default function JournalsPage() {
       <Navbar currentPage="journals" />
 
       {/* Title Section */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="font-handwriting text-4xl sm:text-5xl md:text-6xl text-black">
+          <h1 className="font-handwriting text-3xl sm:text-5xl md:text-6xl text-black">
             Journals
           </h1>
-          <p className="mt-2 text-gray-600 text-lg font-light">
+          <p className="mt-2 text-gray-600 text-base sm:text-lg font-light">
             Capture your thoughts with music
           </p>
         </motion.div>
       </div>
 
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 sm:pb-12">
         {/* Controls */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6 sm:mb-8 gap-3 flex-wrap">
           <motion.div 
-            className="text-2xl font-medium text-gray-900"
+            className="text-xl sm:text-2xl font-medium text-gray-900"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
             Your Notes
           </motion.div>
-          <Button onClick={() => setDialogOpen(true)} className="gap-2">
+          <Button onClick={() => setDialogOpen(true)} className="gap-2 w-full sm:w-auto">
             <Plus className="w-4 h-4" />
             New Note
           </Button>
@@ -351,30 +351,30 @@ export default function JournalsPage() {
 
         {/* Search and Filters */}
         <div className="mb-8 space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-3 flex-1">
-              <div className="relative max-w-md">
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+            <div className="flex flex-col md:flex-row gap-3 flex-1 w-full">
+              <div className="relative w-full md:max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
                   type="text"
                   placeholder="Search notes, songs, or artists..."
                   value={searchQuery}
                   onChange={(e) => { setSearchQuery(e.target.value); setPage(1) }}
-                  className="pl-10"
+                  className="pl-10 w-full"
                 />
               </div>
               
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
-                className="gap-2"
+                className="gap-2 w-full md:w-auto"
               >
                 <Filter className="w-4 h-4" />
                 Filters
               </Button>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 w-full md:w-auto flex-wrap">
               {/* View Mode Toggle */}
               <div className="flex items-center border rounded-lg">
                 <Button
@@ -529,12 +529,12 @@ export default function JournalsPage() {
 
         {/* Journal Grid/List - Song-themed cards */}
         {loading ? (
-          <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" : "space-y-4"}>
+          <div className={viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6" : "space-y-4"}>
             {Array.from({ length: 8 }).map((_, i) => (
               <Card key={i} className="overflow-hidden">
-                <Skeleton className="w-full h-48" />
-                <CardContent className="p-4 space-y-2">
-                  <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="w-full h-40 sm:h-48" />
+                <CardContent className="p-3 sm:p-4 space-y-2">
+                  <Skeleton className="h-3 sm:h-4 w-3/4" />
                   <Skeleton className="h-3 w-1/2" />
                 </CardContent>
               </Card>
@@ -557,7 +557,7 @@ export default function JournalsPage() {
             </Button>
           </div>
         ) : (
-          <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" : "space-y-4"}>
+          <div className={viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6" : "space-y-4"}>
             {paginatedItems.map((journal) => (
               <motion.div
                 key={journal.id}
@@ -572,7 +572,7 @@ export default function JournalsPage() {
                   onClick={() => setViewOpen(journal)}
                 >
                   {/* Song-themed header */}
-                  <div className={`relative overflow-hidden ${viewMode === 'list' ? 'w-32 h-24 flex-shrink-0' : 'h-32'}`}>
+                  <div className={`relative overflow-hidden ${viewMode === 'list' ? 'w-28 sm:w-32 h-24 flex-shrink-0' : 'h-28 sm:h-32'}`}>
                     {journal.spotify_image ? (
                       <div className="relative w-full h-full">
                         <img 
@@ -626,17 +626,17 @@ export default function JournalsPage() {
                   </div>
                   
                   {/* Note preview */}
-                  <CardContent className={`p-4 ${viewMode === 'list' ? 'flex-1' : ''}`}>
-                    <div className="font-handwriting text-xl text-gray-800 mb-2 line-clamp-1">
+                  <CardContent className={`p-3 sm:p-4 ${viewMode === 'list' ? 'flex-1' : ''}`}>
+                    <div className="font-handwriting text-lg sm:text-xl text-gray-800 mb-2 line-clamp-1">
                       {journal.title || 'Untitled'}
                     </div>
-                    <div className={`font-handwriting text-base text-gray-600 leading-relaxed ${
+                    <div className={`font-handwriting text-sm sm:text-base text-gray-600 leading-relaxed ${
                       viewMode === 'list' ? 'line-clamp-3' : 'line-clamp-2'
                     }`}>
                       {journal.content || 'No content...'}
                     </div>
                     <div className="mt-3 flex items-center justify-between">
-                      <div className="text-xs text-gray-400">
+                      <div className="text-[11px] sm:text-xs text-gray-400">
                         {journal.created_at ? new Date(journal.created_at).toLocaleDateString() : ''}
                       </div>
                       {viewMode === 'list' && (
@@ -656,11 +656,11 @@ export default function JournalsPage() {
         {filteredItems.length > 0 && (
           <div className="mt-8">
             <Separator className="mb-6" />
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-600">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="text-xs sm:text-sm text-gray-600">
                 Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, filteredItems.length)} of {filteredItems.length} notes
                   </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap justify-end">
                 <Button
                   variant="outline"
                   size="sm"
@@ -705,6 +705,7 @@ export default function JournalsPage() {
           <DialogHeader className="sr-only">
             <DialogTitle>{editId ? 'Edit Note' : 'Create New Note'}</DialogTitle>
           </DialogHeader>
+          <DialogDescription className="sr-only">{editId ? 'Edit your journal note with optional song details.' : 'Create a new journal note and optionally attach a song.'}</DialogDescription>
           
           {/* Custom header with close button */}
           <div className="p-6 pb-0 flex flex-row items-center justify-between">

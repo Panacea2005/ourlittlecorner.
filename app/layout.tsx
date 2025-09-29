@@ -1,15 +1,16 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { AuthProvider } from '@/app/contexts/AuthContext'
 import './globals.css'
 import { Inter } from 'next/font/google'
-import { Reenie_Beanie } from 'next/font/google'
+import { Mynerve } from 'next/font/google'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
-const dancing = Reenie_Beanie({ subsets: ['latin'], weight: '400', variable: '--font-handwriting' })
+const dancing = Mynerve({ subsets: ['latin'], weight: '400', variable: '--font-handwriting' })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: {
-    default: 'ourlittlecorner — a tiny home for us',
+    default: 'ourlittlecorner — a little corner for us',
     template: '%s · ourlittlecorner',
   },
   description:
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: 'ourlittlecorner — a tiny home for us',
+    title: 'ourlittlecorner — a little corner for us',
     description:
       'A cozy shared space for us — memories, music, journals, and special days.',
     url: '/',
@@ -55,20 +56,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ourlittlecorner — a tiny home for us',
+    title: 'ourlittlecorner — a little corner for us',
     description:
       'A cozy shared space for us — memories, music, journals, and special days.',
     images: ['/images/flower-pattern.png'],
-  },
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#faf6f2' },
-    { media: '(prefers-color-scheme: dark)', color: '#0b0a0a' },
-  ],
-  colorScheme: 'light dark',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    viewportFit: 'cover',
   },
   robots: {
     index: true,
@@ -80,6 +71,17 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#faf6f2' },
+    { media: '(prefers-color-scheme: dark)', color: '#0b0a0a' },
+  ],
+  colorScheme: 'light dark',
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -87,7 +89,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${dancing.variable}`}>
-      <body>
+      <body className="min-h-screen flex flex-col">
         <AuthProvider>
           {children}
         </AuthProvider>

@@ -243,7 +243,7 @@ export default function Navbar({ currentPage = "home" }: { currentPage?: string 
         ) : (
           // Show Auth navigation when logged out
           <NavButton href="/auth" variant="outline" className="text-xs font-light flex items-center">
-            Sign Up / Sign In
+            Sign In
           </NavButton>
         )}
       </div>

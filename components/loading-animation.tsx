@@ -250,11 +250,13 @@ export default function LoadingAnimation() {
           >
           {/* New intro: large text bottom and big sakura logo scrolling right */}
           <motion.div 
-            className="absolute left-0 top-10 z-20"
+            className="absolute left-0 top-4 sm:top-10 z-20"
             initial={{ x: '-40vw', opacity: 1 }}
             animate={introLogoControls}
           >
-            <Image src="/images/flower-pattern.png" alt="Sakura" width={800} height={800} className="w-[40vh] h-[40vh] object-contain" />
+            <Image src="/images/flower-pattern.png" alt="Sakura" width={800} height={800} className="object-contain"
+              style={{ width: 'min(40vh, 70vw)', height: 'auto' }}
+            />
           </motion.div>
 
           <motion.div 
@@ -262,8 +264,8 @@ export default function LoadingAnimation() {
             initial={{ opacity: 0, y: 30 }}
             animate={introTextControls}
           >
-            <div className="w-full flex items-end justify-start pb-6 pl-6 sm:pl-10 md:pl-14 lg:pl-20">
-              <div className="font-handwriting text-black" style={{ fontSize: 'min(18vw, 52vh)', lineHeight: 0.88 }}>
+            <div className="w-full flex items-end justify-start pb-6 pl-4 sm:pl-10 md:pl-14 lg:pl-20">
+              <div className="font-handwriting text-black" style={{ fontSize: 'clamp(36px, 14vw, 42vh)', lineHeight: 0.9 }}>
                 ourlittlecorner.
               </div>
             </div>

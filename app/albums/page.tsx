@@ -10,13 +10,14 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Upload, Search, Calendar, Grid, List, Folder, Plus, FolderPlus, GripVertical } from "lucide-react"
+import { Upload, Search, Calendar, Grid, List, Folder, Plus, FolderPlus, GripVertical, Trash2 } from "lucide-react"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 type GalleryItem = {
   id: string
@@ -48,6 +49,7 @@ export default function AlbumsPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(24)
   const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [newFolderName, setNewFolderName] = useState("")
   const [showCreateFolder, setShowCreateFolder] = useState(false)
   const [draggedItem, setDraggedItem] = useState<GalleryItem | null>(null)
@@ -202,6 +204,25 @@ export default function AlbumsPage() {
     load()
   }, [])
 
+  const deleteImage = async (item: GalleryItem) => {
+    try {
+      setDeletingId(item.id)
+      const path = item.path || ""
+      if (path) {
+        await supabase.storage.from('gallery').remove([path])
+      }
+      await supabase.from('gallery_items').delete().eq('id', item.id)
+      setItems(prev => prev.filter(i => i.id !== item.id))
+      if (selectedImage && selectedImage.id === item.id) {
+        setSelectedImage(null)
+      }
+    } catch (error: any) {
+      setErrorMessage(error.message || 'Failed to delete image')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   const onUpload = async (file: File, folderInput?: string, titleInput?: string) => {
     if (!file) return
     setIsUploading(true)
@@ -246,27 +267,27 @@ export default function AlbumsPage() {
       <Navbar currentPage="albums" />
 
       {/* Title Section */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="font-handwriting text-4xl sm:text-5xl md:text-6xl text-black">
+          <h1 className="font-handwriting text-3xl sm:text-5xl md:text-6xl text-black">
             Our Albums
           </h1>
-          <p className="mt-2 text-gray-600 text-lg font-light">
+          <p className="mt-2 text-gray-600 text-base sm:text-lg font-light">
             Cherished moments captured in time
           </p>
         </motion.div>
       </div>
 
       {/* Controls Section */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="space-y-6">
-          {/* Folder Tabs */}
+          {/* Folders: horizontal chips with scroll */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
               <h3 className="text-lg font-medium text-gray-900">Folders</h3>
               <Button
                 variant="outline"
@@ -278,26 +299,25 @@ export default function AlbumsPage() {
                 New Folder
               </Button>
             </div>
-            
-            <Tabs value={activeFolder} onValueChange={setActiveFolder} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
+
+            <ScrollArea className="w-full whitespace-nowrap">
+              <div className="flex gap-2 py-2 pr-2">
                 {folders.map((folder) => (
-                  <TabsTrigger 
-                    key={folder} 
-                    value={folder} 
-                    className="text-xs relative"
+                  <Button
+                    key={folder}
+                    variant={activeFolder === folder ? 'default' : 'secondary'}
+                    size="sm"
+                    className="text-xs flex items-center gap-1"
+                    onClick={() => setActiveFolder(folder)}
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, folder)}
                   >
-                    <Folder className="w-3 h-3 mr-1" />
+                    <Folder className="w-3 h-3" />
                     {folder}
-                    {draggedItem && draggedItem.folder !== folder && (
-                      <div className="absolute inset-0 bg-blue-100 rounded opacity-50" />
-                    )}
-                  </TabsTrigger>
+                  </Button>
                 ))}
-              </TabsList>
-            </Tabs>
+              </div>
+            </ScrollArea>
           </div>
 
           {/* Create Folder Dialog */}
@@ -325,37 +345,37 @@ export default function AlbumsPage() {
           )}
 
           {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-3 flex-1">
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+            <div className="flex flex-col md:flex-row gap-3 flex-1 w-full">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
                   placeholder="Search albums..."
                   value={query}
                   onChange={(e) => { setQuery(e.target.value); setPage(1) }}
-                  className="pl-10 w-full sm:w-64"
+                  className="pl-10 w-full md:w-64"
                 />
               </div>
               
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full md:w-auto">
                 <Calendar className="w-4 h-4 text-gray-400" />
                 <Input
                   type="date"
                   value={startDate}
                   onChange={(e) => { setStartDate(e.target.value); setPage(1) }}
-                  className="w-40"
+                  className="w-full md:w-40"
                 />
                 <span className="text-gray-500 text-sm">to</span>
                 <Input
                   type="date"
                   value={endDate}
                   onChange={(e) => { setEndDate(e.target.value); setPage(1) }}
-                  className="w-40"
+                  className="w-full md:w-40"
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 w-full md:w-auto">
               <Select value={pageSize.toString()} onValueChange={(value) => { setPageSize(parseInt(value)); setPage(1) }}>
                 <SelectTrigger className="w-24">
                   <SelectValue />
@@ -371,7 +391,7 @@ export default function AlbumsPage() {
 
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="gap-2">
+                  <Button className="gap-2 w-full md:w-auto">
                     <Plus className="w-4 h-4" />
                     Upload
                   </Button>
@@ -389,14 +409,14 @@ export default function AlbumsPage() {
       </div>
 
       {/* Gallery Section */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 sm:pb-12">
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
               <Card key={i} className="overflow-hidden">
-                <Skeleton className="w-full h-48" />
-                <CardContent className="p-4 space-y-2">
-                  <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="w-full h-40 sm:h-48" />
+                <CardContent className="p-3 sm:p-4 space-y-2">
+                  <Skeleton className="h-3 sm:h-4 w-3/4" />
                   <Skeleton className="h-3 w-1/2" />
                 </CardContent>
               </Card>
@@ -415,7 +435,7 @@ export default function AlbumsPage() {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
             {paginatedItems.map((item) => (
               <motion.div
                 key={item.id || item.path}
@@ -438,14 +458,27 @@ export default function AlbumsPage() {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <GripVertical className="w-4 h-4 text-white bg-black/50 rounded p-1" />
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                      <button
+                        className="text-white bg-black/50 rounded p-1 hover:bg-black/70"
+                        title="Drag to move"
+                      >
+                        <GripVertical className="w-4 h-4" />
+                      </button>
+                      <button
+                        className="text-white bg-red-600/70 rounded p-1 hover:bg-red-600 disabled:opacity-50"
+                        title="Delete image"
+                        disabled={deletingId === item.id}
+                        onClick={(e) => { e.stopPropagation(); if (confirm('Delete this image?')) deleteImage(item) }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-                  <CardContent className="p-4">
+                  <CardContent className="p-3 sm:p-4">
                     <div className="space-y-2">
-                      <h3 className="font-medium text-gray-900 truncate">{item.name}</h3>
-                      <div className="flex items-center justify-between text-sm text-gray-500">
+                      <h3 className="font-medium text-gray-900 truncate text-sm sm:text-base">{item.name}</h3>
+                      <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
                         <span>{item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}</span>
                         <Badge variant="secondary" className="text-xs">
                           {item.folder}
@@ -462,13 +495,13 @@ export default function AlbumsPage() {
 
       {/* Pagination */}
       {filteredItems.length > 0 && (
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 sm:pb-8">
           <Separator className="mb-6" />
           <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-600">
+            <div className="text-xs sm:text-sm text-gray-600">
               Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, filteredItems.length)} of {filteredItems.length} items
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap justify-end">
               <Button
                 variant="outline"
                 size="sm"
@@ -515,6 +548,7 @@ export default function AlbumsPage() {
               Upload to Albums
             </DialogTitle>
           </DialogHeader>
+          <DialogDescription className="sr-only">Upload an image to your albums and optionally choose or create a folder.</DialogDescription>
           
           <div className="space-y-6">
             <div className="space-y-2">
@@ -614,7 +648,7 @@ export default function AlbumsPage() {
             
             {/* Image Container */}
             <motion.div
-              className="relative max-w-7xl max-h-[90vh] mx-4"
+              className="relative w-[92vw] sm:w-auto max-w-7xl max-h-[90vh] mx-4"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
@@ -646,6 +680,18 @@ export default function AlbumsPage() {
                   <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
                     {selectedImage.folder}
                   </Badge>
+                </div>
+                <div className="mt-4 flex justify-end">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="gap-2"
+                    disabled={!!deletingId}
+                    onClick={() => { if (selectedImage) deleteImage(selectedImage) }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </Button>
                 </div>
               </div>
             </motion.div>
