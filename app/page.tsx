@@ -8,6 +8,7 @@ import Footer from "@/components/footer"
  
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import TogetherTimer from "@/components/together-timer"
 
 // Home slider cards for nav destinations
 const sections = [
@@ -268,7 +269,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-dvh flex flex-col bg-white relative">
+    <main className="min-h-dvh flex flex-col bg-white relative overflow-x-hidden">
       {/* Background subtle gradient */}
       <div className="fixed inset-0 bg-gradient-to-br from-white via-gray-50 to-gray-100 -z-10" />
       
@@ -280,26 +281,34 @@ export default function Home() {
       {/* Scroll container */}
       <div 
         ref={containerRef}
-        className="h-dvh overflow-y-auto"
+        className="h-dvh overflow-y-auto overflow-x-hidden touch-pan-y overscroll-none"
         style={{ scrollBehavior: 'smooth' }}
       >
-        {/* Section 1: Hero Image */}
+        {/* Section 1: Hero with Timer */}
         <motion.section 
           ref={heroRef}
           className="min-h-dvh flex items-center justify-center relative"
         >
-          <motion.div 
-            className="relative w-full h-full"
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <img 
-              src="/images/hero.jpg" 
-              alt="hero" 
-              className="w-full h-full object-cover" 
-            />
-          </motion.div>
+          <div className="relative w-full h-full grid grid-cols-1 lg:grid-cols-4">
+            {/* Left: Hero image */}
+            <motion.div 
+              className="relative w-full h-full order-2 lg:order-1 lg:col-span-3"
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <img 
+                src="/images/hero.jpg" 
+                alt="hero" 
+                className="w-full h-full object-cover object-right" 
+              />
+            </motion.div>
+
+            {/* Right: Timer */}
+            <div className="relative order-1 lg:order-2 flex items-center justify-center p-6 sm:p-10 lg:justify-end lg:pr-12 lg:col-span-1">
+              <TogetherTimer fontSizeClamp={'clamp(20px, 4vw, 48px)'} />
+            </div>
+          </div>
           
           {/* Floating particles animation */}
           <motion.div className="absolute inset-0 pointer-events-none">
