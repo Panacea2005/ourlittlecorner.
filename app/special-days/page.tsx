@@ -17,6 +17,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Calendar, Heart, Gift, Star, Trash2, Plus, Search, Filter, SortAsc, SortDesc, Grid, List, Eye, EyeOff } from "lucide-react"
+import { formatLocalDate } from '@/lib/dateUtils'
 
 type SpecialDay = {
   id: string
@@ -753,7 +754,7 @@ export default function SpecialDaysPage() {
                           </Badge>
                         </div>
                         <div className="absolute bottom-3 right-3 text-xs text-gray-500">
-                          {new Date(item.date).toLocaleDateString()}
+                          {formatLocalDate(item.date)}
                         </div>
                       </div>
                       
@@ -767,7 +768,7 @@ export default function SpecialDaysPage() {
                         </div>
                         <div className="mt-3 flex items-center justify-between">
                           <div className="text-[11px] sm:text-xs text-gray-400">
-                            {item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}
+                            {item.created_at ? formatLocalDate(item.created_at) : ''}
                           </div>
                           {item.user_name && (
                             <div className="text-xs text-gray-500">

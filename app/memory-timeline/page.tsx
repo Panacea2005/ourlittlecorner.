@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { Calendar, Music, Image, Heart, BookOpen, Clock, ExternalLink } from "lucide-react"
+import { formatLocalDate, formatTimelineDate } from '@/lib/dateUtils'
 
 type TimelineItem = {
   id: string
@@ -118,7 +119,7 @@ export default function MemoryTimelinePage() {
             type: 'special_day',
             title: day.title || 'Special Day',
             content: day.note,
-            date: day.date
+            date: day.created_at  // Use creation time, not the special day date
           })
         })
 
@@ -141,11 +142,20 @@ export default function MemoryTimelinePage() {
     const groups: { [key: string]: TimelineItem[] } = {}
     
     items.forEach(item => {
-      const date = new Date(item.date).toDateString()
-      if (!groups[date]) {
-        groups[date] = []
+      let dateKey: string
+      
+      if (item.type === 'special_day') {
+        // For special days, use the actual date of the special day
+        dateKey = formatLocalDate(item.date, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+      } else {
+        // For journals and photos, use the creation date
+        dateKey = formatLocalDate(item.date, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
       }
-      groups[date].push(item)
+      
+      if (!groups[dateKey]) {
+        groups[dateKey] = []
+      }
+      groups[dateKey].push(item)
     })
     
     return groups
@@ -169,15 +179,6 @@ export default function MemoryTimelinePage() {
     }
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    })
-  }
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -313,7 +314,7 @@ export default function MemoryTimelinePage() {
                       </div>
                       <div className="flex-1">
                         <h2 className="text-3xl font-handwriting text-gray-900 mb-2">
-                          {formatDate(date)}
+                          {date}
                         </h2>
                         <div className="flex items-center gap-4">
                           <p className="text-gray-500 text-lg">
@@ -362,7 +363,7 @@ export default function MemoryTimelinePage() {
                                       </Badge>
                                     )}
                                     <span className="text-xs text-gray-400">
-                                      {new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                      {formatTimelineDate(item.date, item.type)}
                                     </span>
                                     {item.author_name && (
                                       <>

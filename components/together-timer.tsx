@@ -15,7 +15,7 @@ type TimeParts = {
 const START_YEAR = 2025
 const START_MONTH = 8 // 0-indexed (September)
 const START_DAY = 3
-const START_HOUR = 12 // 12:05 PM local time
+const START_HOUR = 12 // 12:05 PM Vietnam time
 const START_MINUTE = 5
 
 function calculateTimeSince(start: Date, now: Date): TimeParts {
@@ -62,12 +62,15 @@ function calculateTimeSince(start: Date, now: Date): TimeParts {
 }
 
 export default function TogetherTimer({ fontSizeClamp = 'clamp(36px, 12vw, 112px)' }: { fontSizeClamp?: string }) {
-  const start = new Date(START_YEAR, START_MONTH, START_DAY, START_HOUR, START_MINUTE, 0, 0)
-  const [parts, setParts] = useState<TimeParts>(() => calculateTimeSince(start, new Date()))
+  // Create start date in Vietnam timezone (UTC+7)
+  // September 3, 2025, 12:05 PM Vietnam time
+  const vietnamStart = new Date('2025-09-03T12:05:00+07:00')
+  
+  const [parts, setParts] = useState<TimeParts>(() => calculateTimeSince(vietnamStart, new Date()))
 
   useEffect(() => {
     const id = setInterval(() => {
-      setParts(calculateTimeSince(start, new Date()))
+      setParts(calculateTimeSince(vietnamStart, new Date()))
     }, 1000)
     return () => clearInterval(id)
   }, [])

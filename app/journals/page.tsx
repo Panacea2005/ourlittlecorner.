@@ -45,6 +45,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import { formatLocalDate } from '@/lib/dateUtils';
 
 type Journal = {
   id: string;
@@ -811,7 +812,7 @@ export default function JournalsPage() {
                     <div className="mt-3 flex items-center justify-between">
                       <div className="text-[11px] sm:text-xs text-gray-400">
                         {journal.created_at
-                          ? new Date(journal.created_at).toLocaleDateString()
+                          ? formatLocalDate(journal.created_at)
                           : ""}
                       </div>
                       {viewMode === "list" && (
@@ -1105,7 +1106,7 @@ export default function JournalsPage() {
               <div className="mt-4 flex items-center gap-4 font-handwriting text-lg text-gray-500">
                 <span>
                   {viewOpen?.created_at
-                    ? new Date(viewOpen.created_at).toLocaleDateString()
+                    ? formatLocalDate(viewOpen.created_at)
                     : ""}
                 </span>
                 <span>•</span>

@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Upload, User, Save } from "lucide-react"
+import { formatLocalDate } from '@/lib/dateUtils'
 import { supabase } from "@/lib/supabase/supabaseClient"
 
 export default function ProfilePage() {
@@ -374,7 +375,7 @@ export default function ProfilePage() {
                     {profile && (
                       <div>
                         <span className="text-gray-500">Last updated:</span>
-                        <p className="font-medium">{new Date(profile.updated_at).toLocaleDateString()}</p>
+                        <p className="font-medium">{formatLocalDate(profile.updated_at)}</p>
                       </div>
                     )}
                     {tableNotExists && (

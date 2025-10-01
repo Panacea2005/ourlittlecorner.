@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import GradientSakura from "@/components/gradient-sakura";
 import { useAuth } from "@/app/contexts/AuthContext";
 
 export default function AuthPage() {
@@ -71,13 +70,17 @@ export default function AuthPage() {
 
   return (
     <main className="relative w-full h-screen overflow-hidden flex">
-      {/* Full screen background with a single centered sakura gradient */}
+      {/* Full screen video background */}
       <div className="absolute inset-0 bg-white overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="opacity-50 scale-90 sm:scale-95 md:scale-100 lg:scale-110">
-            <GradientSakura />
-          </div>
-        </div>
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/video/sakura-1.mp4" type="video/mp4" />
+        </video>
       </div>
 
       {/* Logo in the corner - EXACT same as navbar */}
@@ -89,7 +92,9 @@ export default function AuthPage() {
           transition={{ delay: 0.3 }}
         >
           {/* Logo - same as navbar */}
-          <span className="text-xl font-light tracking-wide text-gray-800 font-handwriting">
+          <span 
+            className="text-xl font-light tracking-wide font-handwriting text-black md:text-white"
+          >
             ourlittlecorner.
           </span>
         </motion.div>
@@ -97,9 +102,9 @@ export default function AuthPage() {
 
       {/* Right side auth panel with light theme grainy effect */}
       <div className="relative md:absolute md:right-0 md:top-0 md:bottom-0 w-full md:w-[45%] md:min-w-[500px] z-20">
-        {/* Light panel with grainy texture */}
+        {/* Light panel with grainy texture and blur */}
         <motion.div
-          className="h-full w-full bg-white/70 flex flex-col md:border-l border-white/40"
+          className="h-full w-full bg-white/80 backdrop-blur-md flex flex-col md:border-l border-white/40"
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
@@ -122,21 +127,21 @@ export default function AuthPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              <h1 className="text-gray-800 text-4xl font-light mb-2 font-handwriting">
+              <h1 className="text-gray-900 text-4xl font-light mb-2 font-handwriting">
                 {isSignIn || !SIGN_UP_ENABLED ? "Welcome back to our little corner" : "Join ourlittlecorner"}
               </h1>
               {!isSignIn && SIGN_UP_ENABLED ? (
-                <p className="text-sm text-gray-600 font-light">
+                <p className="text-sm text-gray-700 font-light">
                   A cozy space for memories, journals, and special days.
                 </p>
               ) : (
-                <p className="text-sm text-gray-600 font-light">
+                <p className="text-sm text-gray-700 font-light">
                   Good to see you. Let's continue where we left off.
                 </p>
               )}
 
               {SIGN_UP_ENABLED && (
-                <div className="flex items-center text-sm text-gray-600 font-light">
+                <div className="flex items-center text-sm text-gray-700 font-light">
                   <span>
                     {isSignIn ? "Don't have an account?" : "Already have an account?"}
                   </span>
@@ -197,14 +202,14 @@ export default function AuthPage() {
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <label className="block text-xs text-gray-600 font-light">
+                      <label className="block text-xs text-gray-700 font-light">
                         Name
                       </label>
                       <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full bg-transparent border-b border-gray-300 px-0 py-3 text-gray-800 text-sm focus:outline-none focus:border-b-gray-500 transition-colors"
+                        className="w-full bg-transparent border-b border-gray-400 px-0 py-3 text-gray-900 text-sm focus:outline-none focus:border-b-gray-600 transition-colors"
                         placeholder="Your name"
                         required
                       />
@@ -213,14 +218,14 @@ export default function AuthPage() {
 
                   {/* Email field with underline style like in reference */}
                   <div className="space-y-1">
-                    <label className="block text-xs text-gray-600 font-light">
+                    <label className="block text-xs text-gray-700 font-light">
                       Email
                     </label>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-transparent border-b border-gray-300 px-0 py-3 text-gray-800 text-sm focus:outline-none focus:border-b-gray-500 transition-colors"
+                      className="w-full bg-transparent border-b border-gray-400 px-0 py-3 text-gray-900 text-sm focus:outline-none focus:border-b-gray-600 transition-colors"
                       placeholder="your@email.com"
                       required
                     />
@@ -228,14 +233,14 @@ export default function AuthPage() {
 
                   {/* Password field with underline style */}
                   <div className="space-y-1">
-                    <label className="block text-xs text-gray-600 font-light">
+                    <label className="block text-xs text-gray-700 font-light">
                       Password
                     </label>
                     <input
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full bg-transparent border-b border-gray-300 px-0 py-3 text-gray-800 text-sm focus:outline-none focus:border-b-gray-500 transition-colors"
+                      className="w-full bg-transparent border-b border-gray-400 px-0 py-3 text-gray-900 text-sm focus:outline-none focus:border-b-gray-600 transition-colors"
                       placeholder="••••••••"
                       required
                     />
@@ -281,7 +286,7 @@ export default function AuthPage() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                           >
-                          {(isSignIn || !SIGN_UP_ENABLED) ? "Enter with Email" : "Create Account"}
+                          {(isSignIn || !SIGN_UP_ENABLED) ? "Enter with Love" : "Create Account"}
                           </motion.span>
                         )}
                       </AnimatePresence>
@@ -295,7 +300,7 @@ export default function AuthPage() {
 
             {/* Terms of service text (show when sign up enabled) */}
             {SIGN_UP_ENABLED && (
-              <div className="text-xs text-gray-500 font-light leading-relaxed">
+              <div className="text-xs text-gray-600 font-light leading-relaxed">
                 By signing up, you agree to our{" "}
                 <a
                   href="#"

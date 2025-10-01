@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Upload, Search, Calendar, Grid, List, Folder, Plus, FolderPlus, GripVertical, Trash2 } from "lucide-react"
+import { formatLocalDate } from '@/lib/dateUtils'
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 type GalleryItem = {
@@ -479,7 +480,7 @@ export default function AlbumsPage() {
                     <div className="space-y-2">
                       <h3 className="font-medium text-gray-900 truncate text-sm sm:text-base">{item.name}</h3>
                       <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
-                        <span>{item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}</span>
+                        <span>{item.created_at ? formatLocalDate(item.created_at) : ''}</span>
                         <Badge variant="secondary" className="text-xs">
                           {item.folder}
                         </Badge>
@@ -676,7 +677,7 @@ export default function AlbumsPage() {
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 rounded-b-lg">
                 <h3 className="text-white text-xl font-medium mb-1">{selectedImage.name}</h3>
                 <div className="flex items-center justify-between text-white/80 text-sm">
-                  <span>{selectedImage.created_at ? new Date(selectedImage.created_at).toLocaleDateString() : ''}</span>
+                  <span>{selectedImage.created_at ? formatLocalDate(selectedImage.created_at) : ''}</span>
                   <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
                     {selectedImage.folder}
                   </Badge>
