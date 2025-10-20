@@ -314,6 +314,12 @@ export default function Navbar({ currentPage = "home" }: { currentPage?: string 
                   <span className="pointer-events-none absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[3px] bg-gray-700 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></span>
                 </span>
               </Link>
+              <Link href="/messages" onClick={() => setMenuOpen(false)} className="group block font-handwriting text-6xl sm:text-7xl md:text-8xl text-gray-800 transition">
+                <span className="relative inline-block">
+                  Messages
+                  <span className="pointer-events-none absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[3px] bg-gray-700 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></span>
+                </span>
+              </Link>
             </motion.div>
           </motion.div>
         )}

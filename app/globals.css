@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --rose-50: oklch(0.97 0.02 12);
+  --rose-100: oklch(0.94 0.03 13);
+  --rose-200: oklch(0.89 0.06 10);
+  --rose-300: oklch(0.81 0.11 12);
+  --rose-400: oklch(0.72 0.17 13);
+  --rose-500: oklch(0.65 0.22 16);
+  --rose-600: oklch(0.59 0.22 18);
+  --rose-700: oklch(0.51 0.20 17);
+  --rose-800: oklch(0.45 0.17 14);
+  --rose-900: oklch(0.41 0.15 10);
+  --rose-950: oklch(0.27 0.10 12);
+  
+  --chart-1: var(--rose-500);
+  --chart-2: var(--rose-700);
+  --chart-3: var(--rose-300);
+  --chart-4: var(--rose-600);
+  --chart-5: var(--rose-400);
+  --color-messages: var(--rose-500);
+}
+
 @keyframes fadeOut {
   from {
     opacity: 1;

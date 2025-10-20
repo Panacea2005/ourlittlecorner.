@@ -43,6 +43,14 @@ const sections = [
     href: '/memory-timeline',
     imageUrl: '/images/bouquet.jpg',
     accentColor: 'rgba(255, 130, 170, 0.35)'
+  },
+  {
+    id: 'messages',
+    title: 'Messages',
+    description: 'Our TikTok conversation archive.',
+    href: '/messages',
+    imageUrl: '/images/orchid.jpg',
+    accentColor: 'rgba(255, 115, 165, 0.35)'
   }
 ]
 
