@@ -16,9 +16,36 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Upload, Search, Calendar, Grid, List, Folder, Plus, FolderPlus, GripVertical, Trash2 } from "lucide-react"
+import { Upload, Search, Calendar, Grid, List, Folder, Plus, FolderPlus, GripVertical, Trash2, Download } from "lucide-react"
 import { formatLocalDate } from '@/lib/dateUtils'
 import { ScrollArea } from "@/components/ui/scroll-area"
+
+type FilterPreset = 'none' | 'vintage' | 'warm' | 'cool' | 'bright' | 'soft' | 'dramatic' | 'blackwhite'
+
+type FrameData = {
+  type: string
+  frameColor: string
+  frameWidth: number
+  filterPreset?: FilterPreset
+  imageFilters?: {
+    brightness: number
+    contrast: number
+    saturation: number
+    sepia: number
+    blur: number
+  }
+}
+
+const FILTER_PRESETS: { value: FilterPreset; label: string; filter: string }[] = [
+  { value: 'none', label: 'None', filter: 'none' },
+  { value: 'vintage', label: 'Vintage', filter: 'sepia(30%) contrast(110%) brightness(95%)' },
+  { value: 'warm', label: 'Warm', filter: 'sepia(20%) saturate(120%) brightness(105%)' },
+  { value: 'cool', label: 'Cool', filter: 'hue-rotate(180deg) saturate(80%) brightness(100%)' },
+  { value: 'bright', label: 'Bright', filter: 'brightness(120%) contrast(110%) saturate(110%)' },
+  { value: 'soft', label: 'Soft', filter: 'brightness(105%) contrast(95%) saturate(90%) blur(0.5px)' },
+  { value: 'dramatic', label: 'Dramatic', filter: 'contrast(130%) brightness(90%) saturate(120%)' },
+  { value: 'blackwhite', label: 'B&W', filter: 'grayscale(100%) contrast(110%)' },
+]
 
 type GalleryItem = {
   id: string
@@ -28,6 +55,7 @@ type GalleryItem = {
   path?: string
   owner?: string | null
   created_at?: string
+  frame_data?: FrameData | null
 }
 
 export default function AlbumsPage() {
@@ -177,6 +205,7 @@ export default function AlbumsPage() {
           path: row.path,
           owner: row.owner || null,
           created_at: row.created_at,
+          frame_data: row.frame_data || null,
         }))
         // Validate existence in storage and purge stale metadata
         const checks = await Promise.allSettled(
@@ -242,15 +271,16 @@ export default function AlbumsPage() {
         .select('*')
         .order('created_at', { ascending: false })
       if (error) throw error
-      const mapped: GalleryItem[] = (data || []).map((row: any) => ({
-        id: row.id,
-        name: row.title || (row.path?.split('/')?.pop() || 'image'),
-        folder: row.folder || 'root',
-        url: row.url,
-        path: row.path,
-        owner: row.owner || null,
-        created_at: row.created_at,
-      }))
+        const mapped: GalleryItem[] = (data || []).map((row: any) => ({
+          id: row.id,
+          name: row.title || (row.path?.split('/')?.pop() || 'image'),
+          folder: row.folder || 'root',
+          url: row.url,
+          path: row.path,
+          owner: row.owner || null,
+          created_at: row.created_at,
+          frame_data: row.frame_data || null,
+        }))
       setItems(mapped)
       const setF = new Set<string>(["root", ...mapped.map((m) => m.folder || 'root')])
       setFolders(Array.from(setF))
@@ -456,15 +486,29 @@ export default function AlbumsPage() {
                     <img 
                       src={item.url} 
                       alt={item.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
                     <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                       <button
                         className="text-white bg-black/50 rounded p-1 hover:bg-black/70"
                         title="Drag to move"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <GripVertical className="w-4 h-4" />
+                      </button>
+                      <button
+                        className="text-white bg-blue-600/70 rounded p-1 hover:bg-blue-600"
+                        title="Download image"
+                        onClick={(e) => { 
+                          e.stopPropagation()
+                          const link = document.createElement('a')
+                          link.href = item.url
+                          link.download = item.name || 'image'
+                          link.click()
+                        }}
+                      >
+                        <Download className="w-4 h-4" />
                       </button>
                       <button
                         className="text-white bg-red-600/70 rounded p-1 hover:bg-red-600 disabled:opacity-50"
@@ -649,12 +693,15 @@ export default function AlbumsPage() {
             
             {/* Image Container */}
             <motion.div
-              className="relative w-[92vw] sm:w-auto max-w-7xl max-h-[90vh] mx-4"
+              className="relative w-[92vw] sm:w-auto max-w-7xl mx-4 flex items-center justify-center"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ duration: 0.3 }}
               onClick={(e) => e.stopPropagation()}
+              style={{
+                maxHeight: '90vh',
+              }}
             >
               {/* Close Button */}
               <button
@@ -682,13 +729,31 @@ export default function AlbumsPage() {
                     {selectedImage.folder}
                   </Badge>
                 </div>
-                <div className="mt-4 flex justify-end">
+                <div className="mt-4 flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 bg-white/20 text-white border-white/30 hover:bg-white/30"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      const link = document.createElement('a')
+                      link.href = selectedImage.url
+                      link.download = selectedImage.name || 'image'
+                      link.click()
+                    }}
+                  >
+                    <Download className="w-4 h-4" />
+                    Download
+                  </Button>
                   <Button
                     variant="destructive"
                     size="sm"
                     className="gap-2"
                     disabled={!!deletingId}
-                    onClick={() => { if (selectedImage) deleteImage(selectedImage) }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (selectedImage) deleteImage(selectedImage)
+                    }}
                   >
                     <Trash2 className="w-4 h-4" />
                     Delete

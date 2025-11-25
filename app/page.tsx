@@ -299,18 +299,18 @@ export default function Home() {
         >
           <div className="relative w-full h-full grid grid-cols-1 lg:grid-cols-4">
             {/* Left: Hero image */}
-            <motion.div 
+          <motion.div 
               className="relative w-full h-full order-2 lg:order-1 lg:col-span-3"
-              initial={{ opacity: 0, scale: 1.05 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <img 
-                src="/images/hero.jpg" 
-                alt="hero" 
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <img 
+              src="/images/hero.jpg" 
+              alt="hero" 
                 className="w-full h-full object-cover object-right" 
-              />
-            </motion.div>
+            />
+          </motion.div>
 
             {/* Right: Timer */}
             <div className="relative order-1 lg:order-2 flex items-center justify-center p-6 sm:p-10 lg:justify-end lg:pr-12 lg:col-span-1">
@@ -745,7 +745,7 @@ export default function Home() {
                    >
                      
                      <motion.div 
-                      className="h-full flex items-center justify-center"
+                       className="h-full flex items-center justify-center"
                        initial={{ opacity: 0, y: 20 }}
                        whileInView={{ opacity: 1, y: 0 }}
                        viewport={{ once: false, amount: 0.5 }}
@@ -791,8 +791,8 @@ export default function Home() {
         {/* Section 5: Footer */}
         <section 
           ref={footerRef}
-          className="w-full"
-        >
+            className="w-full"
+          >
           <div className="w-full">
             <Footer />
           </div>

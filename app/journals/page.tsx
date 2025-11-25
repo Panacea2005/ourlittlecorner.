@@ -142,11 +142,11 @@ export default function JournalsPage() {
     if (dateFilter !== "all") {
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
+      
       filtered = filtered.filter((item) => {
         if (!item.created_at) return false;
         const itemDate = new Date(item.created_at);
-
+        
         switch (dateFilter) {
           case "today":
             return itemDate >= today;
@@ -172,7 +172,7 @@ export default function JournalsPage() {
     // Sort
     filtered.sort((a, b) => {
       let comparison = 0;
-
+      
       switch (sortBy) {
         case "date":
           const dateA = new Date(a.created_at || 0).getTime();
@@ -195,7 +195,7 @@ export default function JournalsPage() {
           comparison = songA.localeCompare(songB);
           break;
       }
-
+      
       return sortOrder === "asc" ? comparison : -comparison;
     });
 
@@ -260,22 +260,22 @@ export default function JournalsPage() {
           .select("*")
           .order("created_at", { ascending: false });
         if (error) throw error;
-
+        
         // Get unique author IDs
         const authorIds = [
           ...new Set(data?.map((j) => j.author).filter(Boolean) || []),
         ];
-
+        
         // Fetch author names
         const { data: profiles } = await supabase
           .from("profiles")
           .select("id, display_name, username, name, full_name")
           .in("id", authorIds);
-
+        
         // Create a map of author ID to display name (prioritize display_name, fallback to name)
         const authorMap = new Map(
           profiles?.map((p) => [
-            p.id,
+          p.id, 
             p.display_name ||
               p.name ||
               p.username ||
@@ -283,10 +283,10 @@ export default function JournalsPage() {
               `User ${p.id.slice(0, 8)}`,
           ]) || []
         );
-
+        
         const list = ((data || []) as any[])
           .map((item) => ({
-            ...item,
+          ...item,
             author_name: item.author
               ? authorMap.get(item.author) || `User ${item.author.slice(0, 8)}`
               : null,
@@ -411,7 +411,7 @@ export default function JournalsPage() {
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 sm:pb-12">
         {/* Controls */}
         <div className="flex items-center justify-between mb-6 sm:mb-8 gap-3 flex-wrap">
-          <motion.div
+          <motion.div 
             className="text-xl sm:text-2xl font-medium text-gray-900"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -451,7 +451,7 @@ export default function JournalsPage() {
                   className="pl-10 w-full"
                 />
               </div>
-
+              
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
@@ -461,7 +461,7 @@ export default function JournalsPage() {
                 Filters
               </Button>
             </div>
-
+            
             <div className="flex items-center gap-3 w-full md:w-auto flex-wrap">
               {/* View Mode Toggle */}
               <div className="flex items-center border rounded-lg">
@@ -505,7 +505,7 @@ export default function JournalsPage() {
                     <SelectItem value="song">Song</SelectItem>
                   </SelectContent>
                 </Select>
-
+                
                 <Button
                   variant="ghost"
                   size="sm"
@@ -542,8 +542,8 @@ export default function JournalsPage() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-          </div>
+        </div>
+      </div>
 
           {/* Filter Panel */}
           {showFilters && (
@@ -616,7 +616,7 @@ export default function JournalsPage() {
                       </Button>
                     )}
                   </div>
-                </div>
+        </div>
 
                 {/* Quick Date Filters */}
                 <div className="space-y-2">
@@ -727,7 +727,7 @@ export default function JournalsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <Card
+                <Card 
                   className={`group overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer bg-white border-0 shadow-md ${
                     viewMode === "list" ? "flex flex-row" : ""
                   }`}
@@ -743,10 +743,10 @@ export default function JournalsPage() {
                   >
                     {journal.spotify_image ? (
                       <div className="relative w-full h-full">
-                        <img
-                          src={journal.spotify_image}
-                          alt={journal.spotify_track_name || "Song"}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        <img 
+                          src={journal.spotify_image} 
+                          alt={journal.spotify_track_name || "Song"} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
                         />
                         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
                         <div className="absolute bottom-2 left-2 right-2">
@@ -763,7 +763,7 @@ export default function JournalsPage() {
                         <Music className="w-8 h-8 text-gray-400" />
                       </div>
                     )}
-
+                    
                     {/* Edit/Delete buttons */}
                     {user && (
                       <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -792,7 +792,7 @@ export default function JournalsPage() {
                       </div>
                     )}
                   </div>
-
+                  
                   {/* Note preview */}
                   <CardContent
                     className={`p-3 sm:p-4 ${
@@ -837,7 +837,7 @@ export default function JournalsPage() {
                 Showing {(currentPage - 1) * pageSize + 1} to{" "}
                 {Math.min(currentPage * pageSize, filteredItems.length)} of{" "}
                 {filteredItems.length} notes
-              </div>
+                  </div>
               <div className="flex items-center gap-2 flex-wrap justify-end">
                 <Button
                   variant="outline"
@@ -873,9 +873,9 @@ export default function JournalsPage() {
                 >
                   Next
                 </Button>
-              </div>
-            </div>
-          </div>
+                    </div>
+                  </div>
+                </div>
         )}
       </div>
 
@@ -892,7 +892,7 @@ export default function JournalsPage() {
               ? "Edit your journal note with optional song details."
               : "Create a new journal note and optionally attach a song."}
           </DialogDescription>
-
+          
           {/* Custom header with close button */}
           <div className="p-6 pb-0 flex flex-row items-center justify-between">
             <h2 className="text-2xl text-gray-800">
@@ -907,15 +907,15 @@ export default function JournalsPage() {
               <X className="w-4 h-4" />
             </Button>
           </div>
-
+          
           <div className="p-6 space-y-6">
             {/* Song Selection */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Music className="w-4 h-4 text-gray-500" />
                 <span className="text-sm font-medium">Choose a song</span>
-              </div>
-
+            </div>
+              
               <div className="flex items-center gap-2">
                 <Input
                   value={trackQuery}
@@ -943,58 +943,58 @@ export default function JournalsPage() {
               {!selectedTrack && trackResults.length > 0 && (
                 <div className="max-h-48 overflow-auto space-y-2">
                   {trackResults.map((track) => (
-                    <div
-                      key={track.id}
-                      onClick={() => setSelectedTrack(track)}
+                    <div 
+                      key={track.id} 
+                      onClick={() => setSelectedTrack(track)} 
                       className="cursor-pointer p-3 border rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                      <SongPreview
-                        trackId={track.id}
-                        name={track.name}
-                        artists={track.artists}
-                        image={track.image}
-                        previewUrl={track.preview_url}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                      <SongPreview 
+                        trackId={track.id} 
+                        name={track.name} 
+                        artists={track.artists} 
+                        image={track.image} 
+                        previewUrl={track.preview_url} 
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
             {/* Note content */}
             <div className="space-y-4">
               <Input
-                value={title}
+                    value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Note title..."
                 className="text-lg"
               />
-
+              
               <Textarea
-                value={content}
+                  value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Write your thoughts..."
                 className="min-h-[200px] text-base leading-relaxed resize-none"
-              />
-            </div>
+                />
+              </div>
 
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={closeDialog}>
                 Cancel
               </Button>
-              <Button
-                onClick={saveJournal}
+              <Button 
+                onClick={saveJournal} 
                 disabled={!selectedTrack || !(title.trim() || content.trim())}
               >
                 {editId ? "Save Changes" : "Create Note"}
               </Button>
-            </div>
-          </div>
+              </div>
+                </div>
         </DialogContent>
       </Dialog>
 
-      {/* View Dialog - Enhanced Paper-style note */}
-      <Dialog open={!!viewOpen} onOpenChange={() => setViewOpen(null)}>
+       {/* View Dialog - Enhanced Paper-style note */}
+       <Dialog open={!!viewOpen} onOpenChange={() => setViewOpen(null)}>
          <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-gradient-to-b from-amber-50/30 to-white [&>button]:hidden">
            <DialogHeader className="sr-only">
              <DialogTitle>{viewOpen?.title || 'Untitled Note'}</DialogTitle>
@@ -1005,60 +1005,60 @@ export default function JournalsPage() {
              <div className="relative h-48 overflow-hidden">
                {/* Full album art background with overlay */}
                <div className="absolute inset-0">
-                 <img 
-                   src={viewOpen.spotify_image} 
-                   alt={viewOpen.spotify_track_name || "Song"} 
+               <img 
+                 src={viewOpen.spotify_image} 
+                 alt={viewOpen.spotify_track_name || "Song"} 
                    className="w-full h-full object-cover" 
-                 />
+               />
                  <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-white" />
-               </div>
-               
+                      </div>
+
                {/* Action buttons - Top right corner */}
                <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
-                 {user?.id && viewOpen?.author === user.id && (
-                   <>
-                     <Button
+               {user?.id && viewOpen?.author === user.id && (
+                 <>
+                   <Button
                        variant="ghost"
-                       size="sm"
-                       onClick={() => {
-                         setDialogOpen(true)
-                         setEditId(viewOpen.id)
-                         setTitle(viewOpen.title || '')
-                         setContent(viewOpen.content || '')
-                         setSelectedTrack({ 
-                           id: viewOpen.spotify_track_id || '', 
-                           name: viewOpen.spotify_track_name || '', 
-                           artists: viewOpen.spotify_artists || '', 
-                           image: viewOpen.spotify_image || '', 
-                           preview_url: viewOpen.spotify_preview_url || '' 
-                         })
-                         setViewOpen(null)
-                       }}
+                     size="sm"
+                     onClick={() => {
+                    setDialogOpen(true)
+                    setEditId(viewOpen.id)
+                    setTitle(viewOpen.title || '')
+                    setContent(viewOpen.content || '')
+                       setSelectedTrack({ 
+                         id: viewOpen.spotify_track_id || '', 
+                         name: viewOpen.spotify_track_name || '', 
+                         artists: viewOpen.spotify_artists || '', 
+                         image: viewOpen.spotify_image || '', 
+                         preview_url: viewOpen.spotify_preview_url || '' 
+                       })
+                       setViewOpen(null)
+                     }}
                        className="h-9 w-9 p-0 bg-white/90 hover:bg-white shadow-lg backdrop-blur-sm"
-                     >
+                   >
                        <Edit className="w-4 h-4 text-gray-700" />
-                     </Button>
-                     <Button
+                   </Button>
+                   <Button
                        variant="ghost"
-                       size="sm"
-                       disabled={deleting}
-                       onClick={() => deleteJournal(viewOpen.id)}
+                     size="sm"
+                     disabled={deleting}
+                     onClick={() => deleteJournal(viewOpen.id)}
                        className="h-9 w-9 p-0 bg-white/90 hover:bg-white shadow-lg backdrop-blur-sm"
-                     >
+                   >
                        <Trash2 className="w-4 h-4 text-red-600" />
-                     </Button>
-                   </>
-                 )}
-                 
-                 <Button
-                   variant="ghost"
-                   size="sm"
-                   onClick={() => setViewOpen(null)}
+                   </Button>
+                </>
+              )}
+               
+               <Button
+                 variant="ghost"
+                 size="sm"
+                 onClick={() => setViewOpen(null)}
                    className="h-9 w-9 p-0 bg-white/90 hover:bg-white shadow-lg backdrop-blur-sm"
-                 >
+               >
                    <X className="w-4 h-4 text-gray-700" />
-                 </Button>
-               </div>
+               </Button>
+             </div>
                
                {/* Song info - bottom aligned with elegant card */}
                <div className="absolute bottom-0 left-0 right-0 p-6">
@@ -1070,7 +1070,7 @@ export default function JournalsPage() {
                        className="w-24 h-24 rounded-lg object-cover shadow-2xl border-2 border-white/80" 
                      />
                      <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/20 to-transparent" />
-                   </div>
+           </div>
                    <div className="flex-1 pb-1 min-w-0">
                      <div className="font-handwriting text-3xl text-white drop-shadow-lg truncate mb-1">
                        {viewOpen.spotify_track_name}
@@ -1083,7 +1083,7 @@ export default function JournalsPage() {
                </div>
              </div>
            )}
-
+           
           {/* Paper content - scrollable */}
           <div
             className="relative p-8 min-h-[400px] max-h-[60vh] overflow-y-auto"
@@ -1111,16 +1111,16 @@ export default function JournalsPage() {
                 </span>
                 <span>•</span>
                 <span>by {viewOpen?.author_name || "anonymous"}</span>
-              </div>
             </div>
+              </div>
 
             {/* Note content - much bigger text */}
             <div className="relative pl-24 pr-8">
               <div className="font-handwriting text-2xl sm:text-3xl md:text-4xl text-gray-800 leading-relaxed whitespace-pre-wrap min-h-[300px]">
                 {viewOpen?.content || "No content available."}
-              </div>
             </div>
           </div>
+        </div>
         </DialogContent>
       </Dialog>
 
