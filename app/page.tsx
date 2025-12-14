@@ -479,6 +479,120 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
+        {/* Section 2.5: Sakura Poem - First Year - Minimalist Layout */}
+        <motion.section 
+          className="min-h-dvh flex items-center justify-center relative px-6 sm:px-8 lg:px-12 xl:px-16"
+        >
+          <motion.div 
+            className="w-full max-w-7xl relative"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false, amount: 0.2, margin: "-100px" }}
+            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* Minimal background - very subtle */}
+            <motion.div
+              className="absolute top-1/2 right-0 w-96 h-96 bg-pink-50/20 rounded-full blur-3xl -translate-y-1/2"
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{ duration: 3, ease: [0.16, 1, 0.3, 1] }}
+            />
+            
+            {/* Grid layout: Left (title) + Right (poem) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-end">
+              {/* Left: Sakura + 1st year (Big Typography) */}
+              <motion.div 
+                className="flex flex-col"
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {/* Sakura - Big Typography */}
+                <motion.div
+                  className="font-handwriting text-black italic"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, amount: 0.5 }}
+                  transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
+                >
+                  <h2 
+                    className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[12rem] leading-none font-handwriting italic"
+                    style={{ 
+                      transform: 'rotate(-1deg)',
+                      letterSpacing: '-0.02em'
+                    }}
+                  >
+                    Sakura
+                  </h2>
+                </motion.div>
+                
+                {/* 1st year - below title, aligned with poem bottom */}
+                <motion.div
+                  className="mt-4"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: false, amount: 0.5 }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.7 }}
+                >
+                  <span className="text-gray-400 text-xs sm:text-sm font-handwriting tracking-[0.2em] uppercase">
+                    1st year
+                  </span>
+                </motion.div>
+              </motion.div>
+
+              {/* Right: Poem (Small font, offset lower, right aligned) */}
+              <motion.div 
+                className="flex flex-col justify-end items-end mt-32 lg:mt-48 xl:mt-64 pr-0"
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+              >
+                <div className="space-y-3 sm:space-y-4 text-right">
+                  <motion.p 
+                    className="text-xs sm:text-sm md:text-base text-gray-700 leading-relaxed font-handwriting"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: false, amount: 0.5 }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.8 }}
+                  >
+                    Petals drift — a hush, a sigh,
+                  </motion.p>
+                  <motion.p 
+                    className="text-xs sm:text-sm md:text-base text-gray-700 leading-relaxed font-handwriting"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: false, amount: 0.5 }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 1.0 }}
+                  >
+                    Your shadow passes, soft and shy.
+                  </motion.p>
+                  <motion.p 
+                    className="text-xs sm:text-sm md:text-base text-gray-700 leading-relaxed font-handwriting"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: false, amount: 0.5 }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 1.2 }}
+                  >
+                    In my eyes, an icy sphere,
+                  </motion.p>
+                  <motion.p 
+                    className="text-xs sm:text-sm md:text-base text-gray-700 leading-relaxed font-handwriting"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: false, amount: 0.5 }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 1.4 }}
+                  >
+                    Spring once bloomed when you were near.
+                  </motion.p>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        </motion.section>
+
         {/* Section 3: Pages Section */}
         <motion.section 
           ref={pagesRef}
